@@ -19,6 +19,14 @@
  */
 
 @theme inline {
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-neon-cyan: var(--neon-cyan);
+  --color-neon-magenta: var(--neon-magenta);
+  --color-neon-lime: var(--neon-lime);
+  --color-space-bg: var(--space-bg);
+  --color-space-panel: var(--space-panel);
+  --color-space-panel-deep: var(--space-panel-deep);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -62,6 +70,13 @@
 }
 
 :root {
+  /* Mars greenhouse neon palette (dark by default) */
+  --neon-cyan: oklch(0.82 0.18 200);
+  --neon-magenta: oklch(0.72 0.27 330);
+  --neon-lime: oklch(0.88 0.22 140);
+  --space-bg: oklch(0.14 0.05 280);
+  --space-panel: oklch(0.20 0.06 275);
+  --space-panel-deep: oklch(0.17 0.05 278);
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
@@ -142,3 +157,24 @@
     color: var(--color-foreground);
   }
 }
+
+.stars {
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.7), transparent 50%),
+    radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.6), transparent 50%),
+    radial-gradient(1.5px 1.5px at 40% 60%, rgba(255,255,255,0.5), transparent 50%),
+    radial-gradient(1px 1px at 85% 20%, rgba(255,255,255,0.8), transparent 50%),
+    radial-gradient(1px 1px at 10% 75%, rgba(255,255,255,0.5), transparent 50%),
+    radial-gradient(1.5px 1.5px at 55% 15%, rgba(255,255,255,0.7), transparent 50%),
+    radial-gradient(1px 1px at 90% 55%, rgba(255,255,255,0.6), transparent 50%),
+    radial-gradient(1px 1px at 30% 90%, rgba(255,255,255,0.5), transparent 50%);
+  background-size: 600px 600px;
+  animation: drift 60s linear infinite;
+}
+
+@keyframes drift {
+  from { background-position: 0 0; }
+  to { background-position: 600px 600px; }
+}
+
+.font-display { font-family: var(--font-display); }
