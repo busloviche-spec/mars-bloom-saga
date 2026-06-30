@@ -157,3 +157,24 @@
     color: var(--color-foreground);
   }
 }
+
+.stars {
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.7), transparent 50%),
+    radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.6), transparent 50%),
+    radial-gradient(1.5px 1.5px at 40% 60%, rgba(255,255,255,0.5), transparent 50%),
+    radial-gradient(1px 1px at 85% 20%, rgba(255,255,255,0.8), transparent 50%),
+    radial-gradient(1px 1px at 10% 75%, rgba(255,255,255,0.5), transparent 50%),
+    radial-gradient(1.5px 1.5px at 55% 15%, rgba(255,255,255,0.7), transparent 50%),
+    radial-gradient(1px 1px at 90% 55%, rgba(255,255,255,0.6), transparent 50%),
+    radial-gradient(1px 1px at 30% 90%, rgba(255,255,255,0.5), transparent 50%);
+  background-size: 600px 600px;
+  animation: drift 60s linear infinite;
+}
+
+@keyframes drift {
+  from { background-position: 0 0; }
+  to { background-position: 600px 600px; }
+}
+
+.font-display { font-family: var(--font-display); }
