@@ -70,6 +70,13 @@
 }
 
 :root {
+  /* Mars greenhouse neon palette (dark by default) */
+  --neon-cyan: oklch(0.82 0.18 200);
+  --neon-magenta: oklch(0.72 0.27 330);
+  --neon-lime: oklch(0.88 0.22 140);
+  --space-bg: oklch(0.14 0.05 280);
+  --space-panel: oklch(0.20 0.06 275);
+  --space-panel-deep: oklch(0.17 0.05 278);
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
