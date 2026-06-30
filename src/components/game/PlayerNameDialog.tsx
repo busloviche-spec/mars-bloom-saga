@@ -11,7 +11,7 @@ export function PlayerNameDialog() {
 
   return (
     <Dialog open={!playerName}>
-      <DialogContent className="max-w-sm border-[color:var(--neon-cyan)]/30 bg-[color:var(--space-bg)] text-foreground" hideClose>
+      <DialogContent className="max-w-sm border-[color:var(--neon-cyan)]/30 bg-[color:var(--space-bg)] text-foreground">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">👨‍🚀 Добро пожаловать на Марс</DialogTitle>
           <DialogDescription>
