@@ -2,26 +2,27 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { PLANT_BY_ID } from "@/game/plants";
 import { useGame } from "@/game/store";
+import { sfx } from "@/game/sounds";
 import { toast } from "sonner";
 
 type Props = {
-  cellIndex: number | null;
+  boxId: string | null;
   onClose: () => void;
   onOpenShop: () => void;
 };
 
-export function PlantSeedDialog({ cellIndex, onClose, onOpenShop }: Props) {
+export function PlantSeedDialog({ boxId, onClose, onOpenShop }: Props) {
   const inventory = useGame((s) => s.inventory);
   const plant = useGame((s) => s.plantSeed);
 
   const owned = Object.entries(inventory).filter(([, n]) => n > 0);
 
   return (
-    <Dialog open={cellIndex !== null} onOpenChange={(v) => !v && onClose()}>
+    <Dialog open={boxId !== null} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-md border-[color:var(--neon-cyan)]/20 bg-[color:var(--space-bg)] text-foreground">
         <DialogHeader>
           <DialogTitle className="font-display text-xl">🌱 Посадить семя</DialogTitle>
-          <DialogDescription>Выбери, что посадить на эту грядку.</DialogDescription>
+          <DialogDescription>Выбери, что посадить в этот изо-бокс.</DialogDescription>
         </DialogHeader>
         {owned.length === 0 ? (
           <div className="space-y-3 py-4 text-center">
@@ -45,7 +46,8 @@ export function PlantSeedDialog({ cellIndex, onClose, onOpenShop }: Props) {
                 <button
                   key={id}
                   onClick={() => {
-                    if (cellIndex !== null && plant(cellIndex, id)) {
+                    if (boxId && plant(boxId, id)) {
+                      sfx.plant();
                       toast.success(`${p.name} посажен`);
                       onClose();
                     }

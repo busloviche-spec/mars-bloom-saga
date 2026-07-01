@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { PLANTS } from "@/game/plants";
 import { useGame } from "@/game/store";
+import { sfx } from "@/game/sounds";
 import { toast } from "sonner";
 
 type Props = {
@@ -83,7 +84,10 @@ export function SeedShopDialog({ open, onOpenChange }: Props) {
                   size="sm"
                   disabled={!canBuy}
                   onClick={() => {
-                    if (buy(p.id)) toast.success(`Куплено: ${p.name}`);
+                    if (buy(p.id)) {
+                      sfx.buy();
+                      toast.success(`Куплено: ${p.name}`);
+                    }
                   }}
                   className="bg-[color:var(--neon-cyan)] text-[color:var(--space-bg)] hover:bg-[color:var(--neon-cyan)]/80"
                 >

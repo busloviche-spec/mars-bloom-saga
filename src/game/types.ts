@@ -11,20 +11,26 @@ export type Plant = {
   idealTemp: number;
   idealHumidity: number;
   idealOxygen: number;
-  growthSeconds: number; // total time to fully grow
+  growthSeconds: number;
   price: number;
   basePoints: number;
   baseReward: number;
   rarity: "common" | "rare" | "epic";
 };
 
-export type GardenCell = {
+export type BoxCell = {
   plantId: string | null;
-  plantedAt: number | null; // ms epoch
-  progress: number; // 0..1
-  happinessSum: number; // accumulated happiness samples
+  plantedAt: number | null;
+  progress: number;
+  happinessSum: number;
   happinessSamples: number;
   isReady: boolean;
+};
+
+export type GreenhouseBox = {
+  id: string;
+  climate: Climate;
+  cell: BoxCell;
 };
 
 export type GameEvent = {
