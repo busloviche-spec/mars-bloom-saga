@@ -1,12 +1,16 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { ActiveEvent, BoxCell, Climate, GreenhouseBox, LeaderEntry } from "./types";
+import type { ActiveEvent, BoxCell, Climate, GreenhouseBox, LeaderEntry, Plant } from "./types";
 import { PLANT_BY_ID, growthRate, plantHappiness } from "./plants";
 import { EVENTS, EVENT_BY_ID } from "./events";
 
 const INITIAL_BOX_COUNT = 4;
 const MAX_BOXES = 8;
 const NEW_BOX_COST = 150;
+
+export const CHEST_PRICE = 200;
+export const MAX_PLANT_LEVEL = 5;
+export const MAX_BOX_LEVEL = 5;
 
 const emptyCell = (): BoxCell => ({
   plantId: null,
@@ -23,10 +27,30 @@ const makeBox = (id: string, climate?: Partial<Climate>): GreenhouseBox => ({
   id,
   climate: { ...defaultClimate(), ...climate },
   cell: emptyCell(),
+  level: 1,
 });
 
 const initialBoxes = (): GreenhouseBox[] =>
   Array.from({ length: INITIAL_BOX_COUNT }, (_, i) => makeBox(`box-${i + 1}`));
+
+export function plantUpgradeCost(currentLevel: number) {
+  return 120 * currentLevel;
+}
+export function boxUpgradeCost(currentLevel: number) {
+  return 180 * currentLevel;
+}
+export function plantSpeedMult(level: number) {
+  return 1 + 0.2 * (level - 1);
+}
+export function plantRewardMult(level: number) {
+  return 1 + 0.25 * (level - 1);
+}
+export function boxSpeedMult(level: number) {
+  return 1 + 0.15 * (level - 1);
+}
+export function boxRewardMult(level: number) {
+  return 1 + 0.15 * (level - 1);
+}
 
 export type GameState = {
   playerName: string | null;
@@ -34,6 +58,9 @@ export type GameState = {
   totalScore: number;
   boxes: GreenhouseBox[];
   inventory: Record<string, number>;
+  customPlants: Record<string, Plant>;
+  plantLevels: Record<string, number>;
+  chests: number;
   activeEvent: ActiveEvent | null;
   lastEventCheck: number;
   leaderboard: LeaderEntry[];
@@ -44,6 +71,10 @@ export type GameState = {
   plantSeed: (boxId: string, plantId: string) => boolean;
   harvest: (boxId: string) => void;
   addBox: () => boolean;
+  buyChest: () => boolean;
+  openChest: (seeds: Plant[]) => void;
+  upgradePlant: (plantId: string) => boolean;
+  upgradeBox: (boxId: string) => boolean;
   tick: () => void;
   triggerRandomEvent: () => void;
   saveScoreToLeaderboard: () => void;
@@ -53,6 +84,14 @@ export type GameState = {
 export const NEW_BOX_PRICE = NEW_BOX_COST;
 export const MAX_BOX_COUNT = MAX_BOXES;
 
+function getPlant(state: Pick<GameState, "customPlants">, id: string): Plant | undefined {
+  return state.customPlants[id] ?? PLANT_BY_ID[id];
+}
+
+export function resolvePlant(state: { customPlants: Record<string, Plant> }, id: string) {
+  return state.customPlants[id] ?? PLANT_BY_ID[id];
+}
+
 export const useGame = create<GameState>()(
   persist(
     (set, get) => ({
@@ -61,6 +100,9 @@ export const useGame = create<GameState>()(
       totalScore: 0,
       boxes: initialBoxes(),
       inventory: {},
+      customPlants: {},
+      plantLevels: {},
+      chests: 0,
       activeEvent: null,
       lastEventCheck: Date.now(),
       leaderboard: [],
@@ -84,13 +126,13 @@ export const useGame = create<GameState>()(
         })),
 
       buySeed: (plantId) => {
-        const plant = PLANT_BY_ID[plantId];
+        const state = get();
+        const plant = getPlant(state, plantId);
         if (!plant) return false;
-        const { credits, inventory } = get();
-        if (credits < plant.price) return false;
+        if (state.credits < plant.price) return false;
         set({
-          credits: credits - plant.price,
-          inventory: { ...inventory, [plantId]: (inventory[plantId] ?? 0) + 1 },
+          credits: state.credits - plant.price,
+          inventory: { ...state.inventory, [plantId]: (state.inventory[plantId] ?? 0) + 1 },
         });
         return true;
       },
@@ -112,26 +154,33 @@ export const useGame = create<GameState>()(
       },
 
       harvest: (boxId) => {
-        const { boxes, credits, totalScore } = get();
-        const box = boxes.find((b) => b.id === boxId);
+        const state = get();
+        const box = state.boxes.find((b) => b.id === boxId);
         if (!box || !box.cell.plantId || !box.cell.isReady) return;
-        const plant = PLANT_BY_ID[box.cell.plantId];
+        const plant = getPlant(state, box.cell.plantId);
+        if (!plant) return;
         const avg = box.cell.happinessSamples > 0 ? box.cell.happinessSum / box.cell.happinessSamples : 0;
         let stars = 1;
         let mult = 1;
         if (avg >= 0.85) { stars = 3; mult = 2; }
         else if (avg >= 0.65) { stars = 2; mult = 1.5; }
-        const reward = Math.round(plant.baseReward * mult);
-        const points = Math.round(plant.basePoints * mult);
+        const pLvl = state.plantLevels[plant.id] ?? 1;
+        const bLvl = box.level ?? 1;
+        const rewardBoost = plantRewardMult(pLvl) * boxRewardMult(bLvl);
+        const reward = Math.round(plant.baseReward * mult * rewardBoost);
+        const points = Math.round(plant.basePoints * mult * rewardBoost);
+        // Chest drop on perfect harvest (3⭐)
+        const gotChest = stars === 3 && Math.random() < 0.35;
         set({
-          boxes: boxes.map((b) => (b.id === boxId ? { ...b, cell: emptyCell() } : b)),
-          credits: credits + reward,
-          totalScore: totalScore + points,
+          boxes: state.boxes.map((b) => (b.id === boxId ? { ...b, cell: emptyCell() } : b)),
+          credits: state.credits + reward,
+          totalScore: state.totalScore + points,
+          chests: state.chests + (gotChest ? 1 : 0),
         });
         if (typeof window !== "undefined") {
           window.dispatchEvent(
             new CustomEvent("greenhouse:harvest", {
-              detail: { stars, reward, points, name: plant.name, emoji: plant.emoji },
+              detail: { stars, reward, points, name: plant.name, emoji: plant.emoji, gotChest },
             }),
           );
         }
@@ -148,6 +197,56 @@ export const useGame = create<GameState>()(
         return true;
       },
 
+      buyChest: () => {
+        const { credits, chests } = get();
+        if (credits < CHEST_PRICE) return false;
+        set({ credits: credits - CHEST_PRICE, chests: chests + 1 });
+        return true;
+      },
+
+      openChest: (seeds) => {
+        if (!seeds.length) return;
+        const state = get();
+        if (state.chests <= 0) return;
+        const nextCustom = { ...state.customPlants };
+        const nextInv = { ...state.inventory };
+        for (const s of seeds) {
+          nextCustom[s.id] = { ...s, isAi: true };
+          nextInv[s.id] = (nextInv[s.id] ?? 0) + 1;
+        }
+        set({ chests: state.chests - 1, customPlants: nextCustom, inventory: nextInv });
+      },
+
+      upgradePlant: (plantId) => {
+        const state = get();
+        const plant = getPlant(state, plantId);
+        if (!plant) return false;
+        const cur = state.plantLevels[plantId] ?? 1;
+        if (cur >= MAX_PLANT_LEVEL) return false;
+        const cost = plantUpgradeCost(cur);
+        if (state.credits < cost) return false;
+        set({
+          credits: state.credits - cost,
+          plantLevels: { ...state.plantLevels, [plantId]: cur + 1 },
+        });
+        return true;
+      },
+
+      upgradeBox: (boxId) => {
+        const state = get();
+        const box = state.boxes.find((b) => b.id === boxId);
+        if (!box) return false;
+        const cur = box.level ?? 1;
+        if (cur >= MAX_BOX_LEVEL) return false;
+        const cost = boxUpgradeCost(cur);
+        if (state.credits < cost) return false;
+        set({
+          credits: state.credits - cost,
+          boxes: state.boxes.map((b) => (b.id === boxId ? { ...b, level: cur + 1 } : b)),
+        });
+        return true;
+      },
+
       tick: () => {
         const state = get();
         const now = Date.now();
@@ -159,7 +258,7 @@ export const useGame = create<GameState>()(
         const newBoxes = state.boxes.map((box) => {
           const cell = box.cell;
           if (!cell.plantId || cell.isReady) return box;
-          const plant = PLANT_BY_ID[cell.plantId];
+          const plant = getPlant(state, cell.plantId);
           if (!plant) return box;
           const effective: Climate = { ...box.climate };
           if (ev) {
@@ -169,7 +268,10 @@ export const useGame = create<GameState>()(
           }
           const happiness = plantHappiness(plant, effective);
           const rate = growthRate(happiness);
-          const progress = Math.min(1, cell.progress + (rate * 1) / plant.growthSeconds);
+          const pLvl = state.plantLevels[plant.id] ?? 1;
+          const bLvl = box.level ?? 1;
+          const speedBoost = plantSpeedMult(pLvl) * boxSpeedMult(bLvl);
+          const progress = Math.min(1, cell.progress + (rate * speedBoost) / plant.growthSeconds);
           const isReady = progress >= 1;
           if (isReady && !cell.isReady) newlyReady.push(plant.name);
           return {
@@ -217,6 +319,9 @@ export const useGame = create<GameState>()(
           totalScore: 0,
           boxes: initialBoxes(),
           inventory: {},
+          customPlants: {},
+          plantLevels: {},
+          chests: 0,
           activeEvent: null,
           lastEventCheck: Date.now(),
           leaderboard,
@@ -225,13 +330,16 @@ export const useGame = create<GameState>()(
       },
     }),
     {
-      name: "mars-greenhouse-v2",
+      name: "mars-greenhouse-v3",
       partialize: (s) => ({
         playerName: s.playerName,
         credits: s.credits,
         totalScore: s.totalScore,
         boxes: s.boxes,
         inventory: s.inventory,
+        customPlants: s.customPlants,
+        plantLevels: s.plantLevels,
+        chests: s.chests,
         leaderboard: s.leaderboard,
       }),
     },
