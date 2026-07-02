@@ -1,15 +1,17 @@
-import { Trophy, Coins, Star, RotateCcw } from "lucide-react";
+import { Trophy, Coins, Star, RotateCcw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGame } from "@/game/store";
 
 type Props = {
   onOpenLeaderboard: () => void;
+  onOpenChests: () => void;
 };
 
-export function TopBar({ onOpenLeaderboard }: Props) {
+export function TopBar({ onOpenLeaderboard, onOpenChests }: Props) {
   const playerName = useGame((s) => s.playerName);
   const credits = useGame((s) => s.credits);
   const totalScore = useGame((s) => s.totalScore);
+  const chests = useGame((s) => s.chests);
   const saveScore = useGame((s) => s.saveScoreToLeaderboard);
   const reset = useGame((s) => s.resetRun);
 
@@ -33,6 +35,20 @@ export function TopBar({ onOpenLeaderboard }: Props) {
           <Star className="size-4" />
           {totalScore}
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onOpenChests}
+          className="border-[color:var(--neon-magenta)]/40 text-[color:var(--neon-magenta)] hover:bg-[color:var(--neon-magenta)]/10 hover:text-[color:var(--neon-magenta)]"
+        >
+          <Sparkles className="mr-1.5 size-4" />
+          Сундуки
+          {chests > 0 && (
+            <span className="ml-1.5 rounded-full bg-[color:var(--neon-magenta)]/20 px-1.5 text-xs">
+              {chests}
+            </span>
+          )}
+        </Button>
         <Button
           variant="outline"
           size="sm"
