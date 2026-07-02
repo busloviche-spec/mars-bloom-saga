@@ -4,6 +4,8 @@ export type Climate = {
   oxygen: number; // 0..100
 };
 
+export type PlantRarity = "common" | "rare" | "epic" | "legendary";
+
 export type Plant = {
   id: string;
   name: string;
@@ -15,7 +17,9 @@ export type Plant = {
   price: number;
   basePoints: number;
   baseReward: number;
-  rarity: "common" | "rare" | "epic";
+  rarity: PlantRarity;
+  description?: string;
+  isAi?: boolean;
 };
 
 export type BoxCell = {
@@ -31,6 +35,7 @@ export type GreenhouseBox = {
   id: string;
   climate: Climate;
   cell: BoxCell;
+  level?: number;
 };
 
 export type GameEvent = {

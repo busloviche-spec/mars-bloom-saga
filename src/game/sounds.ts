@@ -89,4 +89,15 @@ export const sfx = {
     tone({ freq: 520, duration: 0.1, type: "triangle", gain: 0.18 });
     tone({ freq: 780, duration: 0.14, type: "triangle", gain: 0.18, delay: 0.08 });
   },
+  chest() {
+    // Magical shimmer for chest opening
+    tone({ freq: 660, duration: 0.14, type: "triangle", gain: 0.18 });
+    tone({ freq: 990, duration: 0.14, type: "triangle", gain: 0.18, delay: 0.1 });
+    tone({ freq: 1320, duration: 0.16, type: "triangle", gain: 0.2, delay: 0.2 });
+    tone({ freq: 1760, duration: 0.24, type: "sine", gain: 0.18, delay: 0.32 });
+  },
+  upgrade() {
+    tone({ freq: 440, duration: 0.1, type: "square", gain: 0.14, sweepTo: 880 });
+    tone({ freq: 880, duration: 0.16, type: "triangle", gain: 0.18, delay: 0.09 });
+  },
 };
