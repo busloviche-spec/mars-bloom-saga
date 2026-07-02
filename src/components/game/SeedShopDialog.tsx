@@ -1,10 +1,17 @@
-import { Coins, Clock } from "lucide-react";
+import { Coins, Clock, Zap } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { PLANTS } from "@/game/plants";
-import { useGame } from "@/game/store";
+import {
+  useGame,
+  MAX_PLANT_LEVEL,
+  plantUpgradeCost,
+  plantSpeedMult,
+  plantRewardMult,
+} from "@/game/store";
 import { sfx } from "@/game/sounds";
 import { toast } from "sonner";
+import type { Plant } from "@/game/types";
 
 type Props = {
   open: boolean;
@@ -15,88 +22,179 @@ const rarityColor: Record<string, string> = {
   common: "var(--neon-cyan)",
   rare: "var(--neon-magenta)",
   epic: "var(--neon-lime)",
+  legendary: "#facc15",
 };
+
+function PlantRow({
+  p,
+  owned,
+  level,
+  credits,
+  onBuy,
+  onUpgrade,
+  aiOnly,
+}: {
+  p: Plant;
+  owned: number;
+  level: number;
+  credits: number;
+  onBuy?: () => void;
+  onUpgrade: () => void;
+  aiOnly?: boolean;
+}) {
+  const canBuy = !aiOnly && credits >= p.price;
+  const canUpgrade = level < MAX_PLANT_LEVEL;
+  const upCost = plantUpgradeCost(level);
+  const canAffordUpgrade = credits >= upCost && canUpgrade;
+  const color = rarityColor[p.rarity] ?? "var(--neon-cyan)";
+
+  return (
+    <div
+      className="flex flex-col gap-2 rounded-2xl border p-3"
+      style={{ borderColor: `color-mix(in oklab, ${color} 30%, transparent)` }}
+    >
+      <div className="flex items-center gap-3">
+        <div
+          className="grid size-14 shrink-0 place-items-center rounded-xl text-3xl"
+          style={{ background: `color-mix(in oklab, ${color} 12%, transparent)` }}
+        >
+          {p.emoji}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="truncate font-display text-sm">{p.name}</h3>
+            <span
+              className="rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider"
+              style={{
+                background: `color-mix(in oklab, ${color} 18%, transparent)`,
+                color,
+              }}
+            >
+              {p.rarity}
+            </span>
+          </div>
+          <div className="mt-0.5 text-xs text-muted-foreground">
+            🌡 {p.idealTemp > 0 ? "+" : ""}
+            {p.idealTemp}°C · 💧 {p.idealHumidity}% · 🫧 {p.idealOxygen}%
+          </div>
+          <div className="mt-1 flex flex-wrap items-center gap-3 text-xs">
+            {!aiOnly && (
+              <span className="flex items-center gap-1 text-[color:var(--neon-lime)]">
+                <Coins className="size-3" />
+                {p.price}
+              </span>
+            )}
+            <span className="flex items-center gap-1 text-muted-foreground">
+              <Clock className="size-3" />
+              {p.growthSeconds}с
+            </span>
+            {owned > 0 && (
+              <span className="text-[color:var(--neon-cyan)]">×{owned}</span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <div className="flex-1 rounded-lg border border-white/5 bg-[color:var(--space-panel-deep)]/40 px-2 py-1.5 text-[11px]">
+          <span className="font-display text-[color:var(--neon-lime)]">ур.{level}</span>
+          <span className="ml-2 text-muted-foreground">
+            ×{plantSpeedMult(level).toFixed(2)} скор · ×{plantRewardMult(level).toFixed(2)} 💰
+          </span>
+        </div>
+        {onBuy && (
+          <Button
+            size="sm"
+            disabled={!canBuy}
+            onClick={onBuy}
+            className="bg-[color:var(--neon-cyan)] text-[color:var(--space-bg)] hover:bg-[color:var(--neon-cyan)]/80"
+          >
+            Купить
+          </Button>
+        )}
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!canAffordUpgrade}
+          onClick={onUpgrade}
+          className="border-[color:var(--neon-magenta)]/40 text-[color:var(--neon-magenta)] hover:bg-[color:var(--neon-magenta)]/10 hover:text-[color:var(--neon-magenta)]"
+        >
+          <Zap className="mr-1 size-3" />
+          {canUpgrade ? upCost : "MAX"}
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export function SeedShopDialog({ open, onOpenChange }: Props) {
   const credits = useGame((s) => s.credits);
   const inventory = useGame((s) => s.inventory);
+  const customPlants = useGame((s) => s.customPlants);
+  const plantLevels = useGame((s) => s.plantLevels);
   const buy = useGame((s) => s.buySeed);
+  const upgradePlant = useGame((s) => s.upgradePlant);
+
+  const aiList = Object.values(customPlants);
+
+  const handleBuy = (p: Plant) => {
+    if (buy(p.id)) {
+      sfx.buy();
+      toast.success(`Куплено: ${p.name}`);
+    }
+  };
+  const handleUpgrade = (p: Plant, level: number) => {
+    if (upgradePlant(p.id)) {
+      sfx.upgrade();
+      toast.success(`${p.name} прокачан`, {
+        description: `Уровень ${level + 1} · быстрее растёт и приносит больше монет`,
+      });
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl border-[color:var(--neon-cyan)]/20 bg-[color:var(--space-bg)] text-foreground">
+      <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto border-[color:var(--neon-cyan)]/20 bg-[color:var(--space-bg)] text-foreground">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">🛒 Магазин семян</DialogTitle>
           <DialogDescription>
-            Купи семена и посади их на свободные грядки. Идеальные параметры — справа.
+            Покупай семена, прокачивай сорта — рост быстрее и монет больше.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3 sm:grid-cols-2">
-          {PLANTS.map((p) => {
-            const owned = inventory[p.id] ?? 0;
-            const canBuy = credits >= p.price;
-            return (
-              <div
-                key={p.id}
-                className="flex items-center gap-3 rounded-2xl border p-3"
-                style={{ borderColor: `color-mix(in oklab, ${rarityColor[p.rarity]} 30%, transparent)` }}
-              >
-                <div
-                  className="grid size-14 shrink-0 place-items-center rounded-xl text-3xl"
-                  style={{
-                    background: `color-mix(in oklab, ${rarityColor[p.rarity]} 12%, transparent)`,
-                  }}
-                >
-                  {p.emoji}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <h3 className="truncate font-display text-sm">{p.name}</h3>
-                    <span
-                      className="rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider"
-                      style={{
-                        background: `color-mix(in oklab, ${rarityColor[p.rarity]} 18%, transparent)`,
-                        color: rarityColor[p.rarity],
-                      }}
-                    >
-                      {p.rarity}
-                    </span>
-                  </div>
-                  <div className="mt-0.5 text-xs text-muted-foreground">
-                    🌡 {p.idealTemp > 0 ? "+" : ""}
-                    {p.idealTemp}°C · 💧 {p.idealHumidity}% · 🫧 {p.idealOxygen}%
-                  </div>
-                  <div className="mt-1 flex items-center gap-3 text-xs">
-                    <span className="flex items-center gap-1 text-[color:var(--neon-lime)]">
-                      <Coins className="size-3" />
-                      {p.price}
-                    </span>
-                    <span className="flex items-center gap-1 text-muted-foreground">
-                      <Clock className="size-3" />
-                      {p.growthSeconds}с
-                    </span>
-                    {owned > 0 && (
-                      <span className="text-[color:var(--neon-cyan)]">в инвентаре: {owned}</span>
-                    )}
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  disabled={!canBuy}
-                  onClick={() => {
-                    if (buy(p.id)) {
-                      sfx.buy();
-                      toast.success(`Куплено: ${p.name}`);
-                    }
-                  }}
-                  className="bg-[color:var(--neon-cyan)] text-[color:var(--space-bg)] hover:bg-[color:var(--neon-cyan)]/80"
-                >
-                  Купить
-                </Button>
-              </div>
-            );
-          })}
+          {PLANTS.map((p) => (
+            <PlantRow
+              key={p.id}
+              p={p}
+              owned={inventory[p.id] ?? 0}
+              level={plantLevels[p.id] ?? 1}
+              credits={credits}
+              onBuy={() => handleBuy(p)}
+              onUpgrade={() => handleUpgrade(p, plantLevels[p.id] ?? 1)}
+            />
+          ))}
         </div>
+
+        {aiList.length > 0 && (
+          <>
+            <div className="mt-2 flex items-center gap-2 text-xs uppercase tracking-wider text-[color:var(--neon-magenta)]">
+              ✨ Из сундуков (ИИ)
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {aiList.map((p) => (
+                <PlantRow
+                  key={p.id}
+                  p={p}
+                  owned={inventory[p.id] ?? 0}
+                  level={plantLevels[p.id] ?? 1}
+                  credits={credits}
+                  aiOnly
+                  onUpgrade={() => handleUpgrade(p, plantLevels[p.id] ?? 1)}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
