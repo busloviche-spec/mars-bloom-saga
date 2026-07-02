@@ -36,6 +36,9 @@ function moodEmoji(h: number) {
 
 export function GreenhouseBoxCard({ box, index, onPlant }: Props) {
   const harvest = useGame((s) => s.harvest);
+  const upgradeBox = useGame((s) => s.upgradeBox);
+  const credits = useGame((s) => s.credits);
+  const customPlants = useGame((s) => s.customPlants);
   const activeEvent = useGame((s) => s.activeEvent);
   const ev = activeEvent ? EVENT_BY_ID[activeEvent.eventId] : null;
 
@@ -48,8 +51,22 @@ export function GreenhouseBoxCard({ box, index, onPlant }: Props) {
     : box.climate;
 
   const cell = box.cell;
-  const plant = cell.plantId ? PLANT_BY_ID[cell.plantId] : null;
+  const plant = cell.plantId ? resolvePlant({ customPlants }, cell.plantId) : null;
   const happiness = plant ? plantHappiness(plant, effective) : 1;
+
+  const boxLevel = box.level ?? 1;
+  const canUpgradeBox = boxLevel < MAX_BOX_LEVEL;
+  const boxCost = boxUpgradeCost(boxLevel);
+  const canAffordBoxUpgrade = credits >= boxCost && canUpgradeBox;
+
+  const handleBoxUpgrade = () => {
+    if (upgradeBox(box.id)) {
+      sfx.upgrade();
+      toast.success(`Изо-бокс #${index + 1} прокачан`, {
+        description: `Уровень ${boxLevel + 1} · +скорость, +награда`,
+      });
+    }
+  };
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-[color:var(--neon-cyan)]/20 bg-[color:var(--space-panel)]/60 p-3 backdrop-blur-sm">
