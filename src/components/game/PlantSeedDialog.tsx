@@ -1,7 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { PLANT_BY_ID } from "@/game/plants";
-import { useGame } from "@/game/store";
+import { useGame, resolvePlant } from "@/game/store";
 import { sfx } from "@/game/sounds";
 import { toast } from "sonner";
 
@@ -13,6 +12,7 @@ type Props = {
 
 export function PlantSeedDialog({ boxId, onClose, onOpenShop }: Props) {
   const inventory = useGame((s) => s.inventory);
+  const customPlants = useGame((s) => s.customPlants);
   const plant = useGame((s) => s.plantSeed);
 
   const owned = Object.entries(inventory).filter(([, n]) => n > 0);
@@ -40,7 +40,7 @@ export function PlantSeedDialog({ boxId, onClose, onOpenShop }: Props) {
         ) : (
           <div className="grid gap-2">
             {owned.map(([id, n]) => {
-              const p = PLANT_BY_ID[id];
+              const p = resolvePlant({ customPlants }, id);
               if (!p) return null;
               return (
                 <button

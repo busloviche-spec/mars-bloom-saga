@@ -1,9 +1,17 @@
-import { Plus } from "lucide-react";
+import { Plus, Zap } from "lucide-react";
 import type { GreenhouseBox } from "@/game/types";
-import { PLANT_BY_ID, plantHappiness, stageEmoji } from "@/game/plants";
+import { plantHappiness, stageEmoji } from "@/game/plants";
 import { EVENT_BY_ID } from "@/game/events";
-import { useGame } from "@/game/store";
+import {
+  useGame,
+  resolvePlant,
+  boxUpgradeCost,
+  MAX_BOX_LEVEL,
+  boxSpeedMult,
+  boxRewardMult,
+} from "@/game/store";
 import { sfx } from "@/game/sounds";
+import { toast } from "sonner";
 import { BoxClimateControls } from "./ClimateControls";
 import { cn } from "@/lib/utils";
 
