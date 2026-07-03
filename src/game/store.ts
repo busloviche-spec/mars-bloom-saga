@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { ActiveEvent, BoxCell, Climate, GreenhouseBox, LeaderEntry, Plant } from "./types";
+import type { ActiveEvent, BoxCell, Climate, GreenhouseBox, LeaderEntry, Pest, Plant } from "./types";
 import { PLANT_BY_ID, growthRate, plantHappiness } from "./plants";
 import { EVENTS, EVENT_BY_ID } from "./events";
 
