@@ -11,6 +11,7 @@ export function TopBar({ onOpenLeaderboard, onOpenChests }: Props) {
   const playerName = useGame((s) => s.playerName);
   const credits = useGame((s) => s.credits);
   const totalScore = useGame((s) => s.totalScore);
+  const starsEarned = useGame((s) => s.starsEarned);
   const chests = useGame((s) => s.chests);
   const saveScore = useGame((s) => s.saveScoreToLeaderboard);
   const reset = useGame((s) => s.resetRun);
@@ -23,7 +24,7 @@ export function TopBar({ onOpenLeaderboard, onOpenChests }: Props) {
           <h1 className="font-display text-lg leading-tight tracking-tight text-foreground">
             Марсианская теплица
           </h1>
-          <p className="text-xs text-muted-foreground">Агроном: {playerName ?? "—"}</p>
+          <p className="text-xs text-[color:var(--neon-cyan)]/80">Агроном: {playerName ?? "—"}</p>
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2">
@@ -34,6 +35,12 @@ export function TopBar({ onOpenLeaderboard, onOpenChests }: Props) {
         <div className="flex items-center gap-1.5 rounded-full border border-[color:var(--neon-magenta)]/30 bg-[color:var(--neon-magenta)]/10 px-3 py-1.5 text-sm font-semibold text-[color:var(--neon-magenta)]">
           <Star className="size-4" />
           {totalScore}
+        </div>
+        <div
+          title="Заработанные звёзды урожая — открывают новые сорта в магазине"
+          className="flex items-center gap-1.5 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-sm font-semibold text-yellow-300"
+        >
+          ⭐ {starsEarned}
         </div>
         <Button
           variant="outline"
