@@ -168,10 +168,20 @@ export function SeedShopDialog({ open, onOpenChange }: Props) {
   const inventory = useGame((s) => s.inventory);
   const customPlants = useGame((s) => s.customPlants);
   const plantLevels = useGame((s) => s.plantLevels);
+  const starsEarned = useGame((s) => s.starsEarned);
   const buy = useGame((s) => s.buySeed);
   const upgradePlant = useGame((s) => s.upgradePlant);
 
   const aiList = Object.values(customPlants);
+
+  const sortedPlants = [...PLANTS].sort((a, b) => {
+    const na = a.unlockStars ?? 0;
+    const nb = b.unlockStars ?? 0;
+    const la = starsEarned < na ? 1 : 0;
+    const lb = starsEarned < nb ? 1 : 0;
+    if (la !== lb) return la - lb;
+    return na - nb;
+  });
 
   const handleBuy = (p: Plant) => {
     if (buy(p.id)) {
@@ -194,21 +204,27 @@ export function SeedShopDialog({ open, onOpenChange }: Props) {
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">🛒 Магазин семян</DialogTitle>
           <DialogDescription>
-            Покупай семена, прокачивай сорта — рост быстрее и монет больше.
+            Покупай семена, прокачивай сорта — рост быстрее и монет больше. Новые сорта открываются за ⭐ звёзды урожая.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3 sm:grid-cols-2">
-          {PLANTS.map((p) => (
-            <PlantRow
-              key={p.id}
-              p={p}
-              owned={inventory[p.id] ?? 0}
-              level={plantLevels[p.id] ?? 1}
-              credits={credits}
-              onBuy={() => handleBuy(p)}
-              onUpgrade={() => handleUpgrade(p, plantLevels[p.id] ?? 1)}
-            />
-          ))}
+          {sortedPlants.map((p) => {
+            const need = p.unlockStars ?? 0;
+            const locked = starsEarned < need;
+            return (
+              <PlantRow
+                key={p.id}
+                p={p}
+                owned={inventory[p.id] ?? 0}
+                level={plantLevels[p.id] ?? 1}
+                credits={credits}
+                starsEarned={starsEarned}
+                locked={locked}
+                onBuy={locked ? undefined : () => handleBuy(p)}
+                onUpgrade={() => handleUpgrade(p, plantLevels[p.id] ?? 1)}
+              />
+            );
+          })}
         </div>
 
         {aiList.length > 0 && (
