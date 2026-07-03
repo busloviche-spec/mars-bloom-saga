@@ -13,6 +13,7 @@ export const PLANTS: Plant[] = [
     basePoints: 5,
     baseReward: 30,
     rarity: "common",
+    unlockStars: 0,
   },
   {
     id: "neon-mushroom",
@@ -26,6 +27,7 @@ export const PLANTS: Plant[] = [
     basePoints: 8,
     baseReward: 60,
     rarity: "common",
+    unlockStars: 0,
   },
   {
     id: "lava-bush",
@@ -39,6 +41,7 @@ export const PLANTS: Plant[] = [
     basePoints: 10,
     baseReward: 80,
     rarity: "rare",
+    unlockStars: 5,
   },
   {
     id: "star-lichen",
@@ -52,6 +55,7 @@ export const PLANTS: Plant[] = [
     basePoints: 12,
     baseReward: 90,
     rarity: "rare",
+    unlockStars: 15,
   },
   {
     id: "ice-rose",
@@ -65,6 +69,7 @@ export const PLANTS: Plant[] = [
     basePoints: 15,
     baseReward: 130,
     rarity: "epic",
+    unlockStars: 40,
   },
   {
     id: "plasma-vine",
@@ -78,6 +83,7 @@ export const PLANTS: Plant[] = [
     basePoints: 20,
     baseReward: 180,
     rarity: "epic",
+    unlockStars: 100,
   },
 ];
 
