@@ -146,7 +146,7 @@ export const useGame = create<GameState>()(
       },
 
       plantSeed: (boxId, plantId) => {
-        const { inventory, boxes } = get();
+        const { inventory, boxes, pest } = get();
         if ((inventory[plantId] ?? 0) <= 0) return false;
         const box = boxes.find((b) => b.id === boxId);
         if (!box || box.cell.plantId) return false;
@@ -157,6 +157,7 @@ export const useGame = create<GameState>()(
               : b,
           ),
           inventory: { ...inventory, [plantId]: inventory[plantId] - 1 },
+          pest: pest && pest.boxId === boxId ? null : pest,
         });
         return true;
       },
