@@ -37,10 +37,13 @@ function moodEmoji(h: number) {
 export function GreenhouseBoxCard({ box, index, onPlant }: Props) {
   const harvest = useGame((s) => s.harvest);
   const upgradeBox = useGame((s) => s.upgradeBox);
+  const squashPest = useGame((s) => s.squashPest);
   const credits = useGame((s) => s.credits);
   const customPlants = useGame((s) => s.customPlants);
   const activeEvent = useGame((s) => s.activeEvent);
+  const pest = useGame((s) => s.pest);
   const ev = activeEvent ? EVENT_BY_ID[activeEvent.eventId] : null;
+  const hasPest = pest?.boxId === box.id;
 
   const effective = ev
     ? {
