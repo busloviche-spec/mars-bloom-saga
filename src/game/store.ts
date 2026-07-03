@@ -56,6 +56,7 @@ export type GameState = {
   playerName: string | null;
   credits: number;
   totalScore: number;
+  starsEarned: number;
   boxes: GreenhouseBox[];
   inventory: Record<string, number>;
   customPlants: Record<string, Plant>;
@@ -63,6 +64,8 @@ export type GameState = {
   chests: number;
   activeEvent: ActiveEvent | null;
   lastEventCheck: number;
+  pest: Pest | null;
+  lastPestCheck: number;
   leaderboard: LeaderEntry[];
   // actions
   setPlayerName: (name: string) => void;
@@ -77,6 +80,8 @@ export type GameState = {
   upgradeBox: (boxId: string) => boolean;
   tick: () => void;
   triggerRandomEvent: () => void;
+  trySpawnPest: () => void;
+  squashPest: () => void;
   saveScoreToLeaderboard: () => void;
   resetRun: () => void;
 };
