@@ -53,13 +53,34 @@ export function GreenhouseGame() {
         }, 400);
       }
     };
+    const onPestSpawn = () => {
+      toast.warning("🪱 Червь-вредитель!", {
+        description: "Он грызёт растение — кликни, чтобы раздавить его",
+      });
+    };
+    const onPestAte = (e: Event) => {
+      const d = (e as CustomEvent).detail;
+      toast.error("😱 Червь съел урожай", { description: d.name });
+    };
+    const onPestSquash = (e: Event) => {
+      const d = (e as CustomEvent).detail;
+      if (d.bonusChest) {
+        toast.success("🎁 Из червя выпал сундук!");
+      }
+    };
     window.addEventListener("greenhouse:event", onEvent);
     window.addEventListener("greenhouse:ready", onReady);
     window.addEventListener("greenhouse:harvest", onHarvest);
+    window.addEventListener("greenhouse:pest-spawn", onPestSpawn);
+    window.addEventListener("greenhouse:pest-ate", onPestAte);
+    window.addEventListener("greenhouse:pest-squash", onPestSquash);
     return () => {
       window.removeEventListener("greenhouse:event", onEvent);
       window.removeEventListener("greenhouse:ready", onReady);
       window.removeEventListener("greenhouse:harvest", onHarvest);
+      window.removeEventListener("greenhouse:pest-spawn", onPestSpawn);
+      window.removeEventListener("greenhouse:pest-ate", onPestAte);
+      window.removeEventListener("greenhouse:pest-squash", onPestSquash);
     };
   }, []);
 
