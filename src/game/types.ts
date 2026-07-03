@@ -20,6 +20,7 @@ export type Plant = {
   rarity: PlantRarity;
   description?: string;
   isAi?: boolean;
+  unlockStars?: number;
 };
 
 export type BoxCell = {
