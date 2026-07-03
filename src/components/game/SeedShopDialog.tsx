@@ -1,4 +1,4 @@
-import { Coins, Clock, Zap } from "lucide-react";
+import { Coins, Clock, Zap, Lock } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { PLANTS } from "@/game/plants";
@@ -12,6 +12,7 @@ import {
 import { sfx } from "@/game/sounds";
 import { toast } from "sonner";
 import type { Plant } from "@/game/types";
+import { cn } from "@/lib/utils";
 
 type Props = {
   open: boolean;
