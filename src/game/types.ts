@@ -20,6 +20,7 @@ export type Plant = {
   rarity: PlantRarity;
   description?: string;
   isAi?: boolean;
+  unlockStars?: number;
 };
 
 export type BoxCell = {
@@ -59,4 +60,10 @@ export type LeaderEntry = {
   name: string;
   score: number;
   date: number;
+};
+
+export type Pest = {
+  boxId: string;
+  spawnedAt: number;
+  biteProgress: number; // 0..1, when 1 плант уничтожен
 };

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { ActiveEvent, BoxCell, Climate, GreenhouseBox, LeaderEntry, Plant } from "./types";
+import type { ActiveEvent, BoxCell, Climate, GreenhouseBox, LeaderEntry, Pest, Plant } from "./types";
 import { PLANT_BY_ID, growthRate, plantHappiness } from "./plants";
 import { EVENTS, EVENT_BY_ID } from "./events";
 
@@ -56,6 +56,7 @@ export type GameState = {
   playerName: string | null;
   credits: number;
   totalScore: number;
+  starsEarned: number;
   boxes: GreenhouseBox[];
   inventory: Record<string, number>;
   customPlants: Record<string, Plant>;
@@ -63,6 +64,8 @@ export type GameState = {
   chests: number;
   activeEvent: ActiveEvent | null;
   lastEventCheck: number;
+  pest: Pest | null;
+  lastPestCheck: number;
   leaderboard: LeaderEntry[];
   // actions
   setPlayerName: (name: string) => void;
@@ -77,6 +80,8 @@ export type GameState = {
   upgradeBox: (boxId: string) => boolean;
   tick: () => void;
   triggerRandomEvent: () => void;
+  trySpawnPest: () => void;
+  squashPest: () => void;
   saveScoreToLeaderboard: () => void;
   resetRun: () => void;
 };
@@ -98,6 +103,7 @@ export const useGame = create<GameState>()(
       playerName: null,
       credits: 250,
       totalScore: 0,
+      starsEarned: 0,
       boxes: initialBoxes(),
       inventory: {},
       customPlants: {},
@@ -105,6 +111,8 @@ export const useGame = create<GameState>()(
       chests: 0,
       activeEvent: null,
       lastEventCheck: Date.now(),
+      pest: null,
+      lastPestCheck: Date.now(),
       leaderboard: [],
 
       setPlayerName: (name) => set({ playerName: name.trim() || "Агроном" }),
@@ -138,7 +146,7 @@ export const useGame = create<GameState>()(
       },
 
       plantSeed: (boxId, plantId) => {
-        const { inventory, boxes } = get();
+        const { inventory, boxes, pest } = get();
         if ((inventory[plantId] ?? 0) <= 0) return false;
         const box = boxes.find((b) => b.id === boxId);
         if (!box || box.cell.plantId) return false;
@@ -149,6 +157,7 @@ export const useGame = create<GameState>()(
               : b,
           ),
           inventory: { ...inventory, [plantId]: inventory[plantId] - 1 },
+          pest: pest && pest.boxId === boxId ? null : pest,
         });
         return true;
       },
@@ -169,13 +178,14 @@ export const useGame = create<GameState>()(
         const rewardBoost = plantRewardMult(pLvl) * boxRewardMult(bLvl);
         const reward = Math.round(plant.baseReward * mult * rewardBoost);
         const points = Math.round(plant.basePoints * mult * rewardBoost);
-        // Chest drop on perfect harvest (3⭐)
         const gotChest = stars === 3 && Math.random() < 0.35;
         set({
           boxes: state.boxes.map((b) => (b.id === boxId ? { ...b, cell: emptyCell() } : b)),
           credits: state.credits + reward,
           totalScore: state.totalScore + points,
+          starsEarned: state.starsEarned + stars,
           chests: state.chests + (gotChest ? 1 : 0),
+          pest: state.pest && state.pest.boxId === boxId ? null : state.pest,
         });
         if (typeof window !== "undefined") {
           window.dispatchEvent(
@@ -253,8 +263,10 @@ export const useGame = create<GameState>()(
         let activeEvent = state.activeEvent;
         if (activeEvent && now >= activeEvent.endsAt) activeEvent = null;
         const ev = activeEvent ? EVENT_BY_ID[activeEvent.eventId] : null;
+        let pest = state.pest;
 
         const newlyReady: string[] = [];
+        let pestAteName: string | null = null;
         const newBoxes = state.boxes.map((box) => {
           const cell = box.cell;
           if (!cell.plantId || cell.isReady) return box;
@@ -271,7 +283,11 @@ export const useGame = create<GameState>()(
           const pLvl = state.plantLevels[plant.id] ?? 1;
           const bLvl = box.level ?? 1;
           const speedBoost = plantSpeedMult(pLvl) * boxSpeedMult(bLvl);
-          const progress = Math.min(1, cell.progress + (rate * speedBoost) / plant.growthSeconds);
+          let progress = Math.min(1, cell.progress + (rate * speedBoost) / plant.growthSeconds);
+          // pest chews this box
+          if (pest && pest.boxId === box.id) {
+            progress = Math.max(0, progress - 0.03);
+          }
           const isReady = progress >= 1;
           if (isReady && !cell.isReady) newlyReady.push(plant.name);
           return {
@@ -286,10 +302,32 @@ export const useGame = create<GameState>()(
           };
         });
 
+        // advance pest bite; if maxed, destroy the plant
+        let finalBoxes = newBoxes;
+        if (pest) {
+          const bite = pest.biteProgress + 1 / 20; // 20 seconds to devour
+          if (bite >= 1) {
+            const target = finalBoxes.find((b) => b.id === pest!.boxId);
+            if (target?.cell.plantId) {
+              const plant = getPlant(state, target.cell.plantId);
+              pestAteName = plant?.name ?? "растение";
+            }
+            finalBoxes = finalBoxes.map((b) =>
+              b.id === pest!.boxId ? { ...b, cell: emptyCell() } : b,
+            );
+            pest = null;
+          } else {
+            pest = { ...pest, biteProgress: bite };
+          }
+        }
+
         if (newlyReady.length && typeof window !== "undefined") {
           window.dispatchEvent(new CustomEvent("greenhouse:ready", { detail: { names: newlyReady } }));
         }
-        set({ boxes: newBoxes, activeEvent });
+        if (pestAteName && typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("greenhouse:pest-ate", { detail: { name: pestAteName } }));
+        }
+        set({ boxes: finalBoxes, activeEvent, pest });
       },
 
       triggerRandomEvent: () => {
@@ -301,6 +339,40 @@ export const useGame = create<GameState>()(
         });
         if (typeof window !== "undefined") {
           window.dispatchEvent(new CustomEvent("greenhouse:event", { detail: { eventId: ev.id } }));
+        }
+      },
+
+      trySpawnPest: () => {
+        const state = get();
+        if (state.pest) return;
+        const candidates = state.boxes.filter(
+          (b) => b.cell.plantId && !b.cell.isReady,
+        );
+        if (!candidates.length) return;
+        const target = candidates[Math.floor(Math.random() * candidates.length)];
+        const now = Date.now();
+        set({
+          pest: { boxId: target.id, spawnedAt: now, biteProgress: 0 },
+          lastPestCheck: now,
+        });
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("greenhouse:pest-spawn", { detail: { boxId: target.id } }));
+        }
+      },
+
+      squashPest: () => {
+        const state = get();
+        if (!state.pest) return;
+        const bonusChest = Math.random() < 0.08;
+        set({
+          pest: null,
+          credits: state.credits + 25,
+          totalScore: state.totalScore + 10,
+          chests: state.chests + (bonusChest ? 1 : 0),
+          lastPestCheck: Date.now(),
+        });
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("greenhouse:pest-squash", { detail: { bonusChest } }));
         }
       },
 
@@ -317,6 +389,7 @@ export const useGame = create<GameState>()(
         set({
           credits: 250,
           totalScore: 0,
+          starsEarned: 0,
           boxes: initialBoxes(),
           inventory: {},
           customPlants: {},
@@ -324,6 +397,8 @@ export const useGame = create<GameState>()(
           chests: 0,
           activeEvent: null,
           lastEventCheck: Date.now(),
+          pest: null,
+          lastPestCheck: Date.now(),
           leaderboard,
           playerName,
         });
@@ -335,6 +410,7 @@ export const useGame = create<GameState>()(
         playerName: s.playerName,
         credits: s.credits,
         totalScore: s.totalScore,
+        starsEarned: s.starsEarned,
         boxes: s.boxes,
         inventory: s.inventory,
         customPlants: s.customPlants,

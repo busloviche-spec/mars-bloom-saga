@@ -37,10 +37,13 @@ function moodEmoji(h: number) {
 export function GreenhouseBoxCard({ box, index, onPlant }: Props) {
   const harvest = useGame((s) => s.harvest);
   const upgradeBox = useGame((s) => s.upgradeBox);
+  const squashPest = useGame((s) => s.squashPest);
   const credits = useGame((s) => s.credits);
   const customPlants = useGame((s) => s.customPlants);
   const activeEvent = useGame((s) => s.activeEvent);
+  const pest = useGame((s) => s.pest);
   const ev = activeEvent ? EVENT_BY_ID[activeEvent.eventId] : null;
+  const hasPest = pest?.boxId === box.id;
 
   const effective = ev
     ? {
@@ -125,40 +128,68 @@ export function GreenhouseBoxCard({ box, index, onPlant }: Props) {
           <span className="ml-2 font-display text-sm">Посадить</span>
         </button>
       ) : (
-        <button
-          onClick={() => {
-            if (cell.isReady) {
-              sfx.harvest();
-              harvest(box.id);
-            }
-          }}
-          title={plant ? `${plant.name}\n🌡 ${plant.idealTemp}°C  💧 ${plant.idealHumidity}%  🫧 ${plant.idealOxygen}%` : ""}
-          className={cn(
-            "relative flex aspect-[2/1] flex-col items-center justify-center rounded-xl border bg-gradient-to-br from-[color:var(--space-panel)] to-[color:var(--space-panel-deep)] p-2 text-center transition-all",
-            cell.isReady
-              ? "cursor-pointer border-[color:var(--neon-lime)]/70 shadow-[0_0_24px_-4px_var(--neon-lime)]"
-              : "cursor-default border-[color:var(--neon-cyan)]/15",
-          )}
-        >
-          <span
-            className={cn("text-4xl transition-transform duration-500", cell.isReady && "animate-bounce")}
-            style={{ transform: `scale(${0.7 + cell.progress * 0.6})` }}
+        <div className="relative">
+          <button
+            onClick={() => {
+              if (cell.isReady) {
+                sfx.harvest();
+                harvest(box.id);
+              }
+            }}
+            title={plant ? `${plant.name}\n🌡 ${plant.idealTemp}°C  💧 ${plant.idealHumidity}%  🫧 ${plant.idealOxygen}%` : ""}
+            className={cn(
+              "relative flex aspect-[2/1] w-full flex-col items-center justify-center rounded-xl border bg-gradient-to-br from-[color:var(--space-panel)] to-[color:var(--space-panel-deep)] p-2 text-center transition-all",
+              cell.isReady
+                ? "cursor-pointer border-[color:var(--neon-lime)]/70 shadow-[0_0_24px_-4px_var(--neon-lime)]"
+                : "cursor-default border-[color:var(--neon-cyan)]/15",
+              hasPest && "border-red-500/70 shadow-[0_0_24px_-4px_#ef4444]",
+            )}
           >
-            {plant ? stageEmoji(plant, cell.progress) : "🌰"}
-          </span>
-          <span className="mt-1 line-clamp-1 text-[11px] font-medium text-muted-foreground">
-            {plant?.name}
-          </span>
-          <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white/5">
-            <div
-              className="h-full rounded-full transition-all duration-700"
-              style={{
-                width: `${cell.progress * 100}%`,
-                background: "linear-gradient(90deg, var(--neon-cyan), var(--neon-lime))",
+            <span
+              className={cn("text-4xl transition-transform duration-500", cell.isReady && "animate-bounce")}
+              style={{ transform: `scale(${0.7 + cell.progress * 0.6})` }}
+            >
+              {plant ? stageEmoji(plant, cell.progress) : "🌰"}
+            </span>
+            <span className="mt-1 line-clamp-1 text-[11px] font-medium text-foreground/80">
+              {plant?.name}
+            </span>
+            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+              <div
+                className="h-full rounded-full transition-all duration-700"
+                style={{
+                  width: `${cell.progress * 100}%`,
+                  background: "linear-gradient(90deg, var(--neon-cyan), var(--neon-lime))",
+                }}
+              />
+            </div>
+          </button>
+          {hasPest && pest && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                sfx.squash();
+                squashPest();
+                toast.success("🪱 Червь уничтожен!", {
+                  description: "+25 💰 · +10 очков",
+                });
               }}
-            />
-          </div>
-        </button>
+              title="Раздавить червя!"
+              className="worm-pest absolute left-1/2 top-1/2 z-10 grid size-14 place-items-center rounded-full border-2 border-red-500 bg-[color:var(--space-bg)]/80 text-3xl shadow-[0_0_20px_-2px_#ef4444] hover:scale-110"
+              aria-label="Раздавить червя"
+            >
+              🪱
+              <span
+                className="pointer-events-none absolute -bottom-1 left-1/2 h-1 w-10 -translate-x-1/2 overflow-hidden rounded-full bg-white/10"
+              >
+                <span
+                  className="block h-full bg-red-500"
+                  style={{ width: `${pest.biteProgress * 100}%` }}
+                />
+              </span>
+            </button>
+          )}
+        </div>
       )}
 
       <BoxClimateControls boxId={box.id} climate={box.climate} />

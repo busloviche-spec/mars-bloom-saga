@@ -100,4 +100,16 @@ export const sfx = {
     tone({ freq: 440, duration: 0.1, type: "square", gain: 0.14, sweepTo: 880 });
     tone({ freq: 880, duration: 0.16, type: "triangle", gain: 0.18, delay: 0.09 });
   },
+  pest() {
+    // Grinding chew: rapid low-pass noise bursts
+    for (let i = 0; i < 4; i++) {
+      noise(0.06, 0.14, 900);
+      tone({ freq: 140 + i * 20, duration: 0.05, type: "sawtooth", gain: 0.09, delay: i * 0.09 });
+    }
+  },
+  squash() {
+    // Splat
+    noise(0.18, 0.28, 500);
+    tone({ freq: 220, duration: 0.18, type: "sawtooth", gain: 0.2, sweepTo: 60 });
+  },
 };
