@@ -178,13 +178,14 @@ export const useGame = create<GameState>()(
         const rewardBoost = plantRewardMult(pLvl) * boxRewardMult(bLvl);
         const reward = Math.round(plant.baseReward * mult * rewardBoost);
         const points = Math.round(plant.basePoints * mult * rewardBoost);
-        // Chest drop on perfect harvest (3⭐)
         const gotChest = stars === 3 && Math.random() < 0.35;
         set({
           boxes: state.boxes.map((b) => (b.id === boxId ? { ...b, cell: emptyCell() } : b)),
           credits: state.credits + reward,
           totalScore: state.totalScore + points,
+          starsEarned: state.starsEarned + stars,
           chests: state.chests + (gotChest ? 1 : 0),
+          pest: state.pest && state.pest.boxId === boxId ? null : state.pest,
         });
         if (typeof window !== "undefined") {
           window.dispatchEvent(
