@@ -61,3 +61,9 @@ export type LeaderEntry = {
   score: number;
   date: number;
 };
+
+export type Pest = {
+  boxId: string;
+  spawnedAt: number;
+  biteProgress: number; // 0..1, when 1 плант уничтожен
+};
