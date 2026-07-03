@@ -103,6 +103,7 @@ export const useGame = create<GameState>()(
       playerName: null,
       credits: 250,
       totalScore: 0,
+      starsEarned: 0,
       boxes: initialBoxes(),
       inventory: {},
       customPlants: {},
@@ -110,6 +111,8 @@ export const useGame = create<GameState>()(
       chests: 0,
       activeEvent: null,
       lastEventCheck: Date.now(),
+      pest: null,
+      lastPestCheck: Date.now(),
       leaderboard: [],
 
       setPlayerName: (name) => set({ playerName: name.trim() || "Агроном" }),
