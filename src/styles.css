@@ -160,21 +160,56 @@
 
 .stars {
   background-image:
-    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.7), transparent 50%),
-    radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.6), transparent 50%),
-    radial-gradient(1.5px 1.5px at 40% 60%, rgba(255,255,255,0.5), transparent 50%),
-    radial-gradient(1px 1px at 85% 20%, rgba(255,255,255,0.8), transparent 50%),
-    radial-gradient(1px 1px at 10% 75%, rgba(255,255,255,0.5), transparent 50%),
-    radial-gradient(1.5px 1.5px at 55% 15%, rgba(255,255,255,0.7), transparent 50%),
-    radial-gradient(1px 1px at 90% 55%, rgba(255,255,255,0.6), transparent 50%),
-    radial-gradient(1px 1px at 30% 90%, rgba(255,255,255,0.5), transparent 50%);
+    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.85), transparent 50%),
+    radial-gradient(1px 1px at 70% 80%, rgba(180,220,255,0.7), transparent 50%),
+    radial-gradient(1.5px 1.5px at 40% 60%, rgba(255,255,255,0.6), transparent 50%),
+    radial-gradient(1px 1px at 85% 20%, rgba(255,255,255,0.9), transparent 50%),
+    radial-gradient(1px 1px at 10% 75%, rgba(200,255,240,0.6), transparent 50%),
+    radial-gradient(1.5px 1.5px at 55% 15%, rgba(255,255,255,0.8), transparent 50%),
+    radial-gradient(1px 1px at 90% 55%, rgba(255,200,255,0.7), transparent 50%),
+    radial-gradient(1px 1px at 30% 90%, rgba(255,255,255,0.6), transparent 50%),
+    radial-gradient(2px 2px at 65% 40%, rgba(255,255,255,0.9), transparent 50%),
+    radial-gradient(1px 1px at 5% 45%, rgba(180,220,255,0.7), transparent 50%);
   background-size: 600px 600px;
-  animation: drift 60s linear infinite;
+  animation: drift 60s linear infinite, twinkle 6s ease-in-out infinite;
+  position: relative;
+}
+.stars::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(0.5px 0.5px at 12% 22%, rgba(255,255,255,0.55), transparent 50%),
+    radial-gradient(0.5px 0.5px at 33% 71%, rgba(255,255,255,0.5), transparent 50%),
+    radial-gradient(0.5px 0.5px at 58% 8%, rgba(255,255,255,0.5), transparent 50%),
+    radial-gradient(0.5px 0.5px at 78% 47%, rgba(200,220,255,0.55), transparent 50%),
+    radial-gradient(0.5px 0.5px at 22% 62%, rgba(255,255,255,0.5), transparent 50%),
+    radial-gradient(0.5px 0.5px at 44% 88%, rgba(255,220,255,0.45), transparent 50%),
+    radial-gradient(0.5px 0.5px at 91% 12%, rgba(255,255,255,0.55), transparent 50%),
+    radial-gradient(0.5px 0.5px at 3% 5%, rgba(255,255,255,0.5), transparent 50%);
+  background-size: 260px 260px;
+  animation: drift 90s linear infinite reverse, twinkle 4s ease-in-out infinite;
+  opacity: 0.75;
 }
 
 @keyframes drift {
   from { background-position: 0 0; }
   to { background-position: 600px 600px; }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes worm-wiggle {
+  0%, 100% { transform: translate(-50%, -50%) rotate(-8deg) scale(1); }
+  25% { transform: translate(-50%, -50%) rotate(8deg) scale(1.05); }
+  50% { transform: translate(-50%, -50%) rotate(-6deg) scale(1.1); }
+  75% { transform: translate(-50%, -50%) rotate(6deg) scale(1.05); }
+}
+.worm-pest {
+  animation: worm-wiggle 0.6s ease-in-out infinite;
 }
 
 .font-display { font-family: var(--font-display); }
