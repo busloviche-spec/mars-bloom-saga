@@ -175,12 +175,59 @@ export function GreenhouseBoxCard({ box, index, onPlant }: Props) {
                 });
               }}
               title="Раздавить червя!"
-              className="worm-pest absolute left-1/2 top-1/2 z-10 grid size-14 place-items-center rounded-full border-2 border-red-500 bg-[color:var(--space-bg)]/80 text-3xl shadow-[0_0_20px_-2px_#ef4444] hover:scale-110"
+              className="worm-pest absolute left-1/2 top-1/2 z-10 flex h-6 w-20 items-center justify-start rounded-full bg-transparent px-0 hover:scale-110"
               aria-label="Раздавить червя"
             >
-              🪱
+              {/* Segments (tail → head, right side is head) */}
+              <span className="relative flex h-full w-full items-center">
+                {[0, 1, 2, 3, 4].map((i) => {
+                  const size = 10 + i * 2; // grow toward head
+                  const left = 4 + i * 11;
+                  const hue = 350 - i * 4;
+                  return (
+                    <span
+                      key={i}
+                      className="worm-seg absolute rounded-full border border-red-900/60"
+                      style={{
+                        width: size,
+                        height: size,
+                        left,
+                        top: `calc(50% - ${size / 2}px)`,
+                        background: `radial-gradient(circle at 30% 30%, hsl(${hue} 85% 70%), hsl(${hue} 75% 45%))`,
+                        animationDelay: `${i * 0.09}s`,
+                        boxShadow: "0 1px 2px rgba(0,0,0,0.4)",
+                      }}
+                    />
+                  );
+                })}
+                {/* Head */}
+                <span
+                  className="worm-seg absolute rounded-full border border-red-900/70"
+                  style={{
+                    width: 18,
+                    height: 18,
+                    left: 58,
+                    top: "calc(50% - 9px)",
+                    background:
+                      "radial-gradient(circle at 30% 30%, #ffb4b4, #d92626 70%)",
+                    animationDelay: "0.5s",
+                    boxShadow: "0 0 10px -1px #ef4444",
+                  }}
+                >
+                  {/* Eye */}
+                  <span
+                    className="absolute rounded-full bg-black"
+                    style={{ width: 3, height: 3, left: 11, top: 5 }}
+                  />
+                  {/* Mouth */}
+                  <span
+                    className="absolute rounded-b-full bg-red-950"
+                    style={{ width: 5, height: 2, left: 10, top: 11 }}
+                  />
+                </span>
+              </span>
               <span
-                className="pointer-events-none absolute -bottom-1 left-1/2 h-1 w-10 -translate-x-1/2 overflow-hidden rounded-full bg-white/10"
+                className="pointer-events-none absolute -bottom-1.5 left-1/2 h-1 w-14 -translate-x-1/2 overflow-hidden rounded-full bg-white/10"
               >
                 <span
                   className="block h-full bg-red-500"
@@ -189,6 +236,7 @@ export function GreenhouseBoxCard({ box, index, onPlant }: Props) {
               </span>
             </button>
           )}
+
         </div>
       )}
 
