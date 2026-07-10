@@ -4,23 +4,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/*
- * Design system definition.
- *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
- */
-
 @theme inline {
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* Legacy aliases (Mars remap) so existing utility classes keep working */
   --color-neon-cyan: var(--neon-cyan);
   --color-neon-magenta: var(--neon-magenta);
   --color-neon-lime: var(--neon-lime);
@@ -70,81 +57,57 @@
 }
 
 :root {
-  /* Mars greenhouse neon palette — always dark space theme */
-  --neon-cyan: oklch(0.82 0.18 200);
-  --neon-magenta: oklch(0.72 0.27 330);
-  --neon-lime: oklch(0.88 0.22 140);
-  --space-bg: oklch(0.14 0.05 280);
-  --space-panel: oklch(0.20 0.06 275);
-  --space-panel-deep: oklch(0.17 0.05 278);
-  --radius: 0.625rem;
-  --background: oklch(0.14 0.05 280);
-  --foreground: oklch(0.97 0.02 220);
-  --card: oklch(0.20 0.06 275);
-  --card-foreground: oklch(0.97 0.02 220);
-  --popover: oklch(0.20 0.06 275);
-  --popover-foreground: oklch(0.97 0.02 220);
-  --primary: oklch(0.82 0.18 200);
-  --primary-foreground: oklch(0.14 0.05 280);
-  --secondary: oklch(0.27 0.06 275);
-  --secondary-foreground: oklch(0.97 0.02 220);
-  --muted: oklch(0.24 0.05 275);
-  --muted-foreground: oklch(0.82 0.06 220);
-  --accent: oklch(0.27 0.06 275);
-  --accent-foreground: oklch(0.97 0.02 220);
-  --destructive: oklch(0.7 0.22 25);
-  --destructive-foreground: oklch(0.98 0.01 220);
-  --border: oklch(1 0 0 / 14%);
-  --input: oklch(1 0 0 / 18%);
-  --ring: oklch(0.82 0.18 200);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.20 0.06 275);
-  --sidebar-foreground: oklch(0.97 0.02 220);
-  --sidebar-primary: oklch(0.82 0.18 200);
-  --sidebar-primary-foreground: oklch(0.14 0.05 280);
-  --sidebar-accent: oklch(0.27 0.06 275);
-  --sidebar-accent-foreground: oklch(0.97 0.02 220);
-  --sidebar-border: oklch(1 0 0 / 14%);
-  --sidebar-ring: oklch(0.82 0.18 200);
-}
+  /* Mars palette — deep rust/copper */
+  --mars-bg: oklch(0.16 0.06 35);
+  --mars-panel: oklch(0.24 0.08 35);
+  --mars-panel-deep: oklch(0.18 0.07 32);
+  --mars-rust: oklch(0.62 0.19 40);
+  --mars-copper: oklch(0.74 0.16 55);
+  --mars-amber: oklch(0.82 0.15 75);
+  --mars-glow: oklch(0.72 0.22 40);
+  --mars-cream: oklch(0.96 0.03 75);
 
-.dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  /* Legacy neon vars remapped to Mars tones so existing utility classes stay readable */
+  --neon-cyan: var(--mars-amber);      /* accent-1: warm amber (used everywhere) */
+  --neon-magenta: var(--mars-rust);    /* accent-2: rust red */
+  --neon-lime: var(--mars-copper);     /* success/gold: copper */
+  --space-bg: var(--mars-bg);
+  --space-panel: var(--mars-panel);
+  --space-panel-deep: var(--mars-panel-deep);
+
+  --radius: 0.625rem;
+  --background: var(--mars-bg);
+  --foreground: var(--mars-cream);
+  --card: var(--mars-panel);
+  --card-foreground: var(--mars-cream);
+  --popover: var(--mars-panel);
+  --popover-foreground: var(--mars-cream);
+  --primary: var(--mars-rust);
+  --primary-foreground: var(--mars-cream);
+  --secondary: oklch(0.30 0.07 35);
+  --secondary-foreground: var(--mars-cream);
+  --muted: oklch(0.26 0.06 35);
+  --muted-foreground: oklch(0.80 0.06 55);
+  --accent: var(--mars-copper);
+  --accent-foreground: oklch(0.18 0.07 32);
+  --destructive: oklch(0.62 0.24 25);
+  --destructive-foreground: var(--mars-cream);
+  --border: oklch(0.85 0.10 55 / 20%);
+  --input: oklch(0.85 0.10 55 / 22%);
+  --ring: var(--mars-copper);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.74 0.16 55);
+  --chart-3: oklch(0.62 0.19 40);
+  --chart-4: oklch(0.82 0.15 75);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: var(--mars-panel);
+  --sidebar-foreground: var(--mars-cream);
+  --sidebar-primary: var(--mars-rust);
+  --sidebar-primary-foreground: var(--mars-cream);
+  --sidebar-accent: oklch(0.30 0.07 35);
+  --sidebar-accent-foreground: var(--mars-cream);
+  --sidebar-border: oklch(0.85 0.10 55 / 20%);
+  --sidebar-ring: var(--mars-copper);
 }
 
 @layer base {
@@ -158,38 +121,22 @@
   }
 }
 
+/* Dust particles / faint stars for Mars sky (used as overlay over 3D scene) */
 .stars {
   background-image:
-    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.85), transparent 50%),
-    radial-gradient(1px 1px at 70% 80%, rgba(180,220,255,0.7), transparent 50%),
-    radial-gradient(1.5px 1.5px at 40% 60%, rgba(255,255,255,0.6), transparent 50%),
-    radial-gradient(1px 1px at 85% 20%, rgba(255,255,255,0.9), transparent 50%),
-    radial-gradient(1px 1px at 10% 75%, rgba(200,255,240,0.6), transparent 50%),
-    radial-gradient(1.5px 1.5px at 55% 15%, rgba(255,255,255,0.8), transparent 50%),
-    radial-gradient(1px 1px at 90% 55%, rgba(255,200,255,0.7), transparent 50%),
-    radial-gradient(1px 1px at 30% 90%, rgba(255,255,255,0.6), transparent 50%),
-    radial-gradient(2px 2px at 65% 40%, rgba(255,255,255,0.9), transparent 50%),
-    radial-gradient(1px 1px at 5% 45%, rgba(180,220,255,0.7), transparent 50%);
+    radial-gradient(1px 1px at 20% 30%, rgba(255, 200, 160, 0.7), transparent 50%),
+    radial-gradient(1px 1px at 70% 80%, rgba(255, 180, 140, 0.55), transparent 50%),
+    radial-gradient(1.5px 1.5px at 40% 60%, rgba(255, 220, 190, 0.5), transparent 50%),
+    radial-gradient(1px 1px at 85% 20%, rgba(255, 210, 170, 0.6), transparent 50%),
+    radial-gradient(1px 1px at 10% 75%, rgba(255, 190, 150, 0.5), transparent 50%),
+    radial-gradient(1.5px 1.5px at 55% 15%, rgba(255, 220, 190, 0.55), transparent 50%),
+    radial-gradient(1px 1px at 90% 55%, rgba(255, 180, 140, 0.55), transparent 50%),
+    radial-gradient(1px 1px at 30% 90%, rgba(255, 210, 170, 0.5), transparent 50%),
+    radial-gradient(2px 2px at 65% 40%, rgba(255, 230, 200, 0.6), transparent 50%),
+    radial-gradient(1px 1px at 5% 45%, rgba(255, 200, 160, 0.55), transparent 50%);
   background-size: 600px 600px;
-  animation: drift 60s linear infinite, twinkle 6s ease-in-out infinite;
+  animation: drift 90s linear infinite, twinkle 7s ease-in-out infinite;
   position: relative;
-}
-.stars::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(0.5px 0.5px at 12% 22%, rgba(255,255,255,0.55), transparent 50%),
-    radial-gradient(0.5px 0.5px at 33% 71%, rgba(255,255,255,0.5), transparent 50%),
-    radial-gradient(0.5px 0.5px at 58% 8%, rgba(255,255,255,0.5), transparent 50%),
-    radial-gradient(0.5px 0.5px at 78% 47%, rgba(200,220,255,0.55), transparent 50%),
-    radial-gradient(0.5px 0.5px at 22% 62%, rgba(255,255,255,0.5), transparent 50%),
-    radial-gradient(0.5px 0.5px at 44% 88%, rgba(255,220,255,0.45), transparent 50%),
-    radial-gradient(0.5px 0.5px at 91% 12%, rgba(255,255,255,0.55), transparent 50%),
-    radial-gradient(0.5px 0.5px at 3% 5%, rgba(255,255,255,0.5), transparent 50%);
-  background-size: 260px 260px;
-  animation: drift 90s linear infinite reverse, twinkle 4s ease-in-out infinite;
-  opacity: 0.75;
 }
 
 @keyframes drift {
@@ -198,8 +145,8 @@
 }
 
 @keyframes twinkle {
-  0%, 100% { opacity: 0.9; }
-  50% { opacity: 0.55; }
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 0.4; }
 }
 
 @keyframes worm-crawl {
@@ -217,5 +164,36 @@
   animation: worm-seg 0.7s ease-in-out infinite;
 }
 
-
 .font-display { font-family: var(--font-display); }
+
+/* driver.js theme — Mars */
+.driver-popover.mars-driver {
+  background: var(--mars-panel);
+  color: var(--mars-cream);
+  border: 1px solid color-mix(in oklab, var(--mars-copper) 40%, transparent);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.7);
+}
+.driver-popover.mars-driver .driver-popover-title,
+.driver-popover.mars-driver .driver-popover-description {
+  color: var(--mars-cream);
+}
+.driver-popover.mars-driver .driver-popover-progress-text {
+  color: var(--mars-amber);
+}
+.driver-popover.mars-driver button.driver-popover-next-btn,
+.driver-popover.mars-driver button.driver-popover-prev-btn,
+.driver-popover.mars-driver button.driver-popover-close-btn,
+.driver-popover.mars-driver button.driver-popover-done-btn {
+  background: var(--mars-rust);
+  color: var(--mars-cream);
+  border: none;
+  text-shadow: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+.driver-popover.mars-driver button.driver-popover-prev-btn {
+  background: transparent;
+  color: var(--mars-amber);
+  border: 1px solid color-mix(in oklab, var(--mars-amber) 40%, transparent);
+}
