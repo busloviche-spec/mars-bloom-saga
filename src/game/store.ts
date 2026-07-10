@@ -67,6 +67,7 @@ export type GameState = {
   pest: Pest | null;
   lastPestCheck: number;
   leaderboard: LeaderEntry[];
+  onboardingCompleted: boolean;
   // actions
   setPlayerName: (name: string) => void;
   setBoxClimate: (boxId: string, patch: Partial<Climate>) => void;
@@ -83,6 +84,7 @@ export type GameState = {
   trySpawnPest: () => void;
   squashPest: () => void;
   saveScoreToLeaderboard: () => void;
+  markOnboardingCompleted: () => void;
   resetRun: () => void;
 };
 
@@ -114,6 +116,7 @@ export const useGame = create<GameState>()(
       pest: null,
       lastPestCheck: Date.now(),
       leaderboard: [],
+      onboardingCompleted: false,
 
       setPlayerName: (name) => set({ playerName: name.trim() || "Агроном" }),
 
@@ -384,6 +387,8 @@ export const useGame = create<GameState>()(
         set({ leaderboard: merged });
       },
 
+      markOnboardingCompleted: () => set({ onboardingCompleted: true }),
+
       resetRun: () => {
         const { leaderboard, playerName } = get();
         set({
@@ -417,6 +422,7 @@ export const useGame = create<GameState>()(
         plantLevels: s.plantLevels,
         chests: s.chests,
         leaderboard: s.leaderboard,
+        onboardingCompleted: s.onboardingCompleted,
       }),
     },
   ),
