@@ -14,33 +14,16 @@ import { PlantSeedDialog } from "./PlantSeedDialog";
 import { LeaderboardDialog } from "./LeaderboardDialog";
 import { PlayerNameDialog } from "./PlayerNameDialog";
 import { ChestDialog } from "./ChestDialog";
-import { HelpDialog } from "./HelpDialog";
-import { MarsScene } from "./MarsScene";
-import { startOnboardingTour } from "./onboarding";
 
 export function GreenhouseGame() {
   useGameTick();
   const [shopOpen, setShopOpen] = useState(false);
   const [leaderOpen, setLeaderOpen] = useState(false);
   const [chestOpen, setChestOpen] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
   const [plantingBox, setPlantingBox] = useState<string | null>(null);
   const activeEvent = useGame((s) => s.activeEvent);
   const chests = useGame((s) => s.chests);
-  const playerName = useGame((s) => s.playerName);
-  const onboardingCompleted = useGame((s) => s.onboardingCompleted);
-  const markOnboarded = useGame((s) => s.markOnboardingCompleted);
   const ev = activeEvent ? EVENT_BY_ID[activeEvent.eventId] : null;
-
-  // Автозапуск обучения для новичков (после ввода имени)
-  useEffect(() => {
-    if (!playerName || onboardingCompleted) return;
-    const t = window.setTimeout(() => {
-      startOnboardingTour();
-      markOnboarded();
-    }, 900);
-    return () => window.clearTimeout(t);
-  }, [playerName, onboardingCompleted, markOnboarded]);
 
   useEffect(() => {
     const onEvent = (e: Event) => {
@@ -81,7 +64,9 @@ export function GreenhouseGame() {
     };
     const onPestSquash = (e: Event) => {
       const d = (e as CustomEvent).detail;
-      if (d.bonusChest) toast.success("🎁 Из червя выпал сундук!");
+      if (d.bonusChest) {
+        toast.success("🎁 Из червя выпал сундук!");
+      }
     };
     window.addEventListener("greenhouse:event", onEvent);
     window.addEventListener("greenhouse:ready", onReady);
@@ -100,43 +85,27 @@ export function GreenhouseGame() {
   }, []);
 
   return (
-    <div className="relative min-h-screen overflow-hidden text-foreground">
-      <MarsScene />
+    <div className="relative min-h-screen overflow-hidden bg-[color:var(--space-bg)] text-foreground">
+      <div className="pointer-events-none absolute inset-0 opacity-70" aria-hidden>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,color-mix(in_oklab,var(--neon-magenta)_18%,transparent),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,color-mix(in_oklab,var(--neon-cyan)_15%,transparent),transparent_60%)]" />
+        <div className="stars absolute inset-0" />
+      </div>
 
       <main className="relative mx-auto flex max-w-5xl flex-col gap-4 p-3 sm:p-6">
         <TopBar
           onOpenLeaderboard={() => setLeaderOpen(true)}
           onOpenChests={() => setChestOpen(true)}
-          onOpenHelp={() => setHelpOpen(true)}
         />
 
         {ev && (
-          <div className="rounded-2xl border border-[color:var(--mars-rust)]/50 bg-[color:var(--mars-rust)]/15 px-4 py-2 text-sm text-[color:var(--mars-amber)] animate-pulse">
+          <div className="rounded-2xl border border-[color:var(--neon-magenta)]/40 bg-[color:var(--neon-magenta)]/10 px-4 py-2 text-sm text-[color:var(--neon-magenta)] animate-pulse">
             {ev.emoji} <span className="font-display">{ev.name}</span> — {ev.description}. Каждый бокс под ударом!
           </div>
         )}
 
-        <div className="rounded-2xl border border-[color:var(--mars-copper)]/20 bg-[color:var(--mars-panel)]/50 p-3 text-xs text-[color:var(--mars-cream)]/85 sm:p-4">
-          <p className="mb-2">
-            🧪 <span className="font-medium text-[color:var(--mars-cream)]">Изо-боксы</span> — у каждого свой микроклимат и уровень апгрейда. Прокачивай сорта и боксы, чтобы растения росли быстрее и приносили больше монет.
-          </p>
-          <ul className="grid gap-1 sm:grid-cols-3">
-            <li>
-              <span className="font-display text-[color:var(--mars-amber)]">🌡 Температура</span> — −50…+50°C. У каждого сорта свой идеал; отклонение снижает настроение и скорость роста.
-            </li>
-            <li>
-              <span className="font-display text-[color:var(--mars-amber)]">💧 Влажность</span> — 0…100%. Слишком сухо — вянет, слишком влажно — гниёт.
-            </li>
-            <li>
-              <span className="font-display text-[color:var(--mars-amber)]">🫧 Кислород</span> — 0…100%. Нужен корням; влияет на здоровье и урожай.
-            </li>
-          </ul>
-          <button
-            onClick={() => setHelpOpen(true)}
-            className="mt-2 text-[color:var(--mars-amber)] underline-offset-2 hover:underline"
-          >
-            Открыть полную инструкцию →
-          </button>
+        <div className="rounded-2xl border border-[color:var(--neon-cyan)]/10 bg-[color:var(--space-panel)]/20 p-3 text-xs text-muted-foreground sm:p-4">
+          🧪 <span className="font-medium text-foreground">Изо-боксы</span> — у каждого свой микроклимат и уровень апгрейда. Прокачивай сорта и боксы, чтобы растения росли быстрее и приносили больше монет.
         </div>
 
         <Garden onPlant={(id) => setPlantingBox(id)} />
@@ -144,27 +113,26 @@ export function GreenhouseGame() {
         <div className="grid gap-2 sm:grid-cols-2">
           <Button
             onClick={() => setShopOpen(true)}
-            data-tour="shop"
-            className="h-12 bg-gradient-to-r from-[color:var(--mars-copper)] to-[color:var(--mars-amber)] font-display text-base text-[color:var(--mars-panel-deep)] shadow-[0_0_24px_-4px_var(--mars-copper)] hover:opacity-90"
+            className="h-12 bg-gradient-to-r from-[color:var(--neon-cyan)] to-[color:var(--neon-lime)] font-display text-base text-[color:var(--space-bg)] shadow-[0_0_24px_-4px_var(--neon-cyan)] hover:opacity-90"
           >
             <ShoppingBag className="mr-2 size-5" />
             Магазин семян
           </Button>
           <Button
             onClick={() => setChestOpen(true)}
-            className="relative h-12 bg-gradient-to-r from-[color:var(--mars-rust)] to-[color:var(--mars-copper)] font-display text-base text-[color:var(--mars-cream)] shadow-[0_0_24px_-4px_var(--mars-rust)] hover:opacity-90"
+            className="relative h-12 bg-gradient-to-r from-[color:var(--neon-magenta)] to-[color:var(--neon-cyan)] font-display text-base text-[color:var(--space-bg)] shadow-[0_0_24px_-4px_var(--neon-magenta)] hover:opacity-90"
           >
             <Sparkles className="mr-2 size-5" />
             Сундуки (ИИ)
             {chests > 0 && (
-              <span className="ml-2 rounded-full bg-[color:var(--mars-panel-deep)]/70 px-2 py-0.5 text-xs text-[color:var(--mars-amber)]">
+              <span className="ml-2 rounded-full bg-[color:var(--space-bg)]/80 px-2 py-0.5 text-xs text-[color:var(--neon-magenta)]">
                 {chests}
               </span>
             )}
           </Button>
         </div>
 
-        <footer className="pb-4 pt-2 text-center text-xs text-[color:var(--mars-cream)]/60">
+        <footer className="pb-4 pt-2 text-center text-xs text-muted-foreground">
           Каждый изо-бокс имеет свой климат. Прокачивай сорта и боксы, открывай сундуки с ИИ-семенами.
         </footer>
       </main>
@@ -178,14 +146,6 @@ export function GreenhouseGame() {
         onOpenShop={() => setShopOpen(true)}
       />
       <LeaderboardDialog open={leaderOpen} onOpenChange={setLeaderOpen} />
-      <HelpDialog
-        open={helpOpen}
-        onOpenChange={setHelpOpen}
-        onStartTour={() => {
-          startOnboardingTour();
-          markOnboarded();
-        }}
-      />
       <Toaster />
     </div>
   );

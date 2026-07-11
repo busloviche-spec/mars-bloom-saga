@@ -72,7 +72,7 @@ export function GreenhouseBoxCard({ box, index, onPlant }: Props) {
   };
 
   return (
-    <div data-tour={index === 0 ? "box" : undefined} className="flex flex-col gap-3 rounded-2xl border border-[color:var(--neon-cyan)]/20 bg-[color:var(--space-panel)]/60 p-3 backdrop-blur-sm">
+    <div className="flex flex-col gap-3 rounded-2xl border border-[color:var(--neon-cyan)]/20 bg-[color:var(--space-panel)]/60 p-3 backdrop-blur-sm">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="grid size-6 place-items-center rounded-md bg-[color:var(--neon-cyan)]/15 font-display text-xs text-[color:var(--neon-cyan)]">
@@ -99,7 +99,6 @@ export function GreenhouseBoxCard({ box, index, onPlant }: Props) {
             </span>
           )}
           <button
-            data-tour={index === 0 ? "box-upgrade" : undefined}
             onClick={handleBoxUpgrade}
             disabled={!canAffordBoxUpgrade}
             title={
