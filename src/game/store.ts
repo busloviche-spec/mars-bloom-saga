@@ -84,6 +84,8 @@ export type GameState = {
   squashPest: () => void;
   saveScoreToLeaderboard: () => void;
   resetRun: () => void;
+  hasSeenTutorial: boolean;
+  markTutorialSeen: () => void;
 };
 
 export const NEW_BOX_PRICE = NEW_BOX_COST;
