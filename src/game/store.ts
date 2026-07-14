@@ -116,6 +116,8 @@ export const useGame = create<GameState>()(
       pest: null,
       lastPestCheck: Date.now(),
       leaderboard: [],
+      hasSeenTutorial: false,
+      markTutorialSeen: () => set({ hasSeenTutorial: true }),
 
       setPlayerName: (name) => set({ playerName: name.trim() || "Агроном" }),
 
