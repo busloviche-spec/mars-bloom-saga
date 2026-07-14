@@ -83,6 +83,7 @@ export function BoxClimateControls({ boxId, climate }: Props) {
         max={50}
         color={tempColor(climate.temp)}
         drift={ev?.tempDelta}
+        tooltip="🌡 Температура (−50…+50°C). У каждого сорта свой идеал — чем ближе, тем быстрее рост и больше монет."
         onChange={(v) => setBoxClimate(boxId, { temp: v })}
       />
       <Row
@@ -93,6 +94,7 @@ export function BoxClimateControls({ boxId, climate }: Props) {
         max={100}
         color={humidityColor(climate.humidity)}
         drift={ev?.humidityDelta}
+        tooltip="💧 Влажность (0–100%). Уровень воды в воздухе. Слишком сухо или сыро — растение грустит и растёт медленнее."
         onChange={(v) => setBoxClimate(boxId, { humidity: v })}
       />
       <Row
@@ -103,6 +105,7 @@ export function BoxClimateControls({ boxId, climate }: Props) {
         max={100}
         color={oxygenColor(climate.oxygen)}
         drift={ev?.oxygenDelta}
+        tooltip="🫧 Кислород (0–100%). Влияет на скорость фотосинтеза и настроение растения."
         onChange={(v) => setBoxClimate(boxId, { oxygen: v })}
       />
     </div>
