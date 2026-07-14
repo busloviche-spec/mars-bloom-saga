@@ -60,6 +60,16 @@ export function TopBar({ onOpenLeaderboard, onOpenChests, onOpenHelp }: Props) {
         <Button
           variant="outline"
           size="sm"
+          onClick={onOpenHelp}
+          title="Как играть — правила и подсказки"
+          className="border-[color:var(--neon-lime)]/40 text-[color:var(--neon-lime)] hover:bg-[color:var(--neon-lime)]/10 hover:text-[color:var(--neon-lime)]"
+        >
+          <HelpCircle className="mr-1.5 size-4" />
+          Как играть
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => {
             saveScore();
             onOpenLeaderboard();
