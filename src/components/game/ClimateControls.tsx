@@ -22,10 +22,11 @@ type RowProps = {
   max: number;
   color: string;
   drift?: number;
+  tooltip: string;
   onChange: (v: number) => void;
 };
 
-function Row({ icon, value, display, min, max, color, drift, onChange }: RowProps) {
+function Row({ icon, value, display, min, max, color, drift, tooltip, onChange }: RowProps) {
   const pct = ((value - min) / (max - min)) * 100;
   const effPct = drift !== undefined && drift !== 0 ? ((value + drift - min) / (max - min)) * 100 : null;
   return (
