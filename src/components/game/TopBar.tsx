@@ -1,13 +1,14 @@
-import { Trophy, Coins, Star, RotateCcw, Sparkles } from "lucide-react";
+import { Trophy, Coins, Star, RotateCcw, Sparkles, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGame } from "@/game/store";
 
 type Props = {
   onOpenLeaderboard: () => void;
   onOpenChests: () => void;
+  onOpenHelp: () => void;
 };
 
-export function TopBar({ onOpenLeaderboard, onOpenChests }: Props) {
+export function TopBar({ onOpenLeaderboard, onOpenChests, onOpenHelp }: Props) {
   const playerName = useGame((s) => s.playerName);
   const credits = useGame((s) => s.credits);
   const totalScore = useGame((s) => s.totalScore);
@@ -55,6 +56,16 @@ export function TopBar({ onOpenLeaderboard, onOpenChests }: Props) {
               {chests}
             </span>
           )}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onOpenHelp}
+          title="Как играть — правила и подсказки"
+          className="border-[color:var(--neon-lime)]/40 text-[color:var(--neon-lime)] hover:bg-[color:var(--neon-lime)]/10 hover:text-[color:var(--neon-lime)]"
+        >
+          <HelpCircle className="mr-1.5 size-4" />
+          Как играть
         </Button>
         <Button
           variant="outline"

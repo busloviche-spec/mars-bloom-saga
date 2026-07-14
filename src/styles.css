@@ -70,46 +70,46 @@
 }
 
 :root {
-  /* Mars greenhouse neon palette — always dark space theme */
-  --neon-cyan: oklch(0.82 0.18 200);
-  --neon-magenta: oklch(0.72 0.27 330);
-  --neon-lime: oklch(0.88 0.22 140);
-  --space-bg: oklch(0.14 0.05 280);
-  --space-panel: oklch(0.20 0.06 275);
-  --space-panel-deep: oklch(0.17 0.05 278);
+  /* Марсианская палитра — красно-медный, ржавый, песочный */
+  --neon-cyan: oklch(0.78 0.17 55);        /* медно-оранжевый (главный акцент) */
+  --neon-magenta: oklch(0.68 0.22 25);     /* марсианский красный */
+  --neon-lime: oklch(0.86 0.17 90);        /* песочно-жёлтый (успех/готово) */
+  --space-bg: oklch(0.16 0.05 40);         /* глубокая ржавчина — фон */
+  --space-panel: oklch(0.22 0.06 35);      /* тёплый коричневый — панель */
+  --space-panel-deep: oklch(0.18 0.05 38); /* глубже */
   --radius: 0.625rem;
-  --background: oklch(0.14 0.05 280);
-  --foreground: oklch(0.97 0.02 220);
-  --card: oklch(0.20 0.06 275);
-  --card-foreground: oklch(0.97 0.02 220);
-  --popover: oklch(0.20 0.06 275);
-  --popover-foreground: oklch(0.97 0.02 220);
-  --primary: oklch(0.82 0.18 200);
-  --primary-foreground: oklch(0.14 0.05 280);
-  --secondary: oklch(0.27 0.06 275);
-  --secondary-foreground: oklch(0.97 0.02 220);
-  --muted: oklch(0.24 0.05 275);
-  --muted-foreground: oklch(0.82 0.06 220);
-  --accent: oklch(0.27 0.06 275);
-  --accent-foreground: oklch(0.97 0.02 220);
-  --destructive: oklch(0.7 0.22 25);
-  --destructive-foreground: oklch(0.98 0.01 220);
+  --background: oklch(0.16 0.05 40);
+  --foreground: oklch(0.96 0.02 80);       /* светло-песочный — читаемо */
+  --card: oklch(0.22 0.06 35);
+  --card-foreground: oklch(0.96 0.02 80);
+  --popover: oklch(0.22 0.06 35);
+  --popover-foreground: oklch(0.96 0.02 80);
+  --primary: oklch(0.78 0.17 55);
+  --primary-foreground: oklch(0.16 0.05 40);
+  --secondary: oklch(0.30 0.06 35);
+  --secondary-foreground: oklch(0.96 0.02 80);
+  --muted: oklch(0.26 0.05 38);
+  --muted-foreground: oklch(0.82 0.05 70); /* приглушённый бежевый */
+  --accent: oklch(0.30 0.06 35);
+  --accent-foreground: oklch(0.96 0.02 80);
+  --destructive: oklch(0.62 0.24 15);
+  --destructive-foreground: oklch(0.98 0.01 80);
   --border: oklch(1 0 0 / 14%);
   --input: oklch(1 0 0 / 18%);
-  --ring: oklch(0.82 0.18 200);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.20 0.06 275);
-  --sidebar-foreground: oklch(0.97 0.02 220);
-  --sidebar-primary: oklch(0.82 0.18 200);
-  --sidebar-primary-foreground: oklch(0.14 0.05 280);
-  --sidebar-accent: oklch(0.27 0.06 275);
-  --sidebar-accent-foreground: oklch(0.97 0.02 220);
+  --ring: oklch(0.78 0.17 55);
+  --chart-1: oklch(0.68 0.22 25);
+  --chart-2: oklch(0.78 0.17 55);
+  --chart-3: oklch(0.86 0.17 90);
+  --chart-4: oklch(0.55 0.15 30);
+  --chart-5: oklch(0.72 0.18 45);
+  --sidebar: oklch(0.22 0.06 35);
+  --sidebar-foreground: oklch(0.96 0.02 80);
+  --sidebar-primary: oklch(0.78 0.17 55);
+  --sidebar-primary-foreground: oklch(0.16 0.05 40);
+  --sidebar-accent: oklch(0.30 0.06 35);
+  --sidebar-accent-foreground: oklch(0.96 0.02 80);
   --sidebar-border: oklch(1 0 0 / 14%);
-  --sidebar-ring: oklch(0.82 0.18 200);
+  --sidebar-ring: oklch(0.78 0.17 55);
 }
 
 .dark {

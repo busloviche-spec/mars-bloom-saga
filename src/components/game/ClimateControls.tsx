@@ -22,16 +22,17 @@ type RowProps = {
   max: number;
   color: string;
   drift?: number;
+  tooltip: string;
   onChange: (v: number) => void;
 };
 
-function Row({ icon, value, display, min, max, color, drift, onChange }: RowProps) {
+function Row({ icon, value, display, min, max, color, drift, tooltip, onChange }: RowProps) {
   const pct = ((value - min) / (max - min)) * 100;
   const effPct = drift !== undefined && drift !== 0 ? ((value + drift - min) / (max - min)) * 100 : null;
   return (
     <div className="flex items-center gap-2">
-      <span style={{ color }} className="shrink-0">{icon}</span>
-      <div className="relative h-2 flex-1 rounded-full bg-white/5">
+      <span style={{ color }} title={tooltip} className="shrink-0 cursor-help">{icon}</span>
+      <div className="relative h-2 flex-1 rounded-full bg-white/5" title={tooltip}>
         <div
           className="absolute inset-y-0 left-0 rounded-full"
           style={{ width: `${pct}%`, background: color, boxShadow: `0 0 8px ${color}` }}
@@ -82,6 +83,7 @@ export function BoxClimateControls({ boxId, climate }: Props) {
         max={50}
         color={tempColor(climate.temp)}
         drift={ev?.tempDelta}
+        tooltip="🌡 Температура (−50…+50°C). У каждого сорта свой идеал — чем ближе, тем быстрее рост и больше монет."
         onChange={(v) => setBoxClimate(boxId, { temp: v })}
       />
       <Row
@@ -92,6 +94,7 @@ export function BoxClimateControls({ boxId, climate }: Props) {
         max={100}
         color={humidityColor(climate.humidity)}
         drift={ev?.humidityDelta}
+        tooltip="💧 Влажность (0–100%). Уровень воды в воздухе. Слишком сухо или сыро — растение грустит и растёт медленнее."
         onChange={(v) => setBoxClimate(boxId, { humidity: v })}
       />
       <Row
@@ -102,6 +105,7 @@ export function BoxClimateControls({ boxId, climate }: Props) {
         max={100}
         color={oxygenColor(climate.oxygen)}
         drift={ev?.oxygenDelta}
+        tooltip="🫧 Кислород (0–100%). Влияет на скорость фотосинтеза и настроение растения."
         onChange={(v) => setBoxClimate(boxId, { oxygen: v })}
       />
     </div>

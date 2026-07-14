@@ -84,6 +84,8 @@ export type GameState = {
   squashPest: () => void;
   saveScoreToLeaderboard: () => void;
   resetRun: () => void;
+  hasSeenTutorial: boolean;
+  markTutorialSeen: () => void;
 };
 
 export const NEW_BOX_PRICE = NEW_BOX_COST;
@@ -114,6 +116,8 @@ export const useGame = create<GameState>()(
       pest: null,
       lastPestCheck: Date.now(),
       leaderboard: [],
+      hasSeenTutorial: false,
+      markTutorialSeen: () => set({ hasSeenTutorial: true }),
 
       setPlayerName: (name) => set({ playerName: name.trim() || "Агроном" }),
 
