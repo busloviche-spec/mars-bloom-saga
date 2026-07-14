@@ -14,16 +14,27 @@ import { PlantSeedDialog } from "./PlantSeedDialog";
 import { LeaderboardDialog } from "./LeaderboardDialog";
 import { PlayerNameDialog } from "./PlayerNameDialog";
 import { ChestDialog } from "./ChestDialog";
+import { HowToPlayDialog } from "./HowToPlayDialog";
 
 export function GreenhouseGame() {
   useGameTick();
   const [shopOpen, setShopOpen] = useState(false);
   const [leaderOpen, setLeaderOpen] = useState(false);
   const [chestOpen, setChestOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [plantingBox, setPlantingBox] = useState<string | null>(null);
   const activeEvent = useGame((s) => s.activeEvent);
   const chests = useGame((s) => s.chests);
+  const hasSeenTutorial = useGame((s) => s.hasSeenTutorial);
+  const markTutorialSeen = useGame((s) => s.markTutorialSeen);
   const ev = activeEvent ? EVENT_BY_ID[activeEvent.eventId] : null;
+
+  useEffect(() => {
+    if (!hasSeenTutorial) {
+      setHelpOpen(true);
+      markTutorialSeen();
+    }
+  }, [hasSeenTutorial, markTutorialSeen]);
 
   useEffect(() => {
     const onEvent = (e: Event) => {
