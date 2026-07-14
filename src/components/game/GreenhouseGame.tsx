@@ -107,6 +107,7 @@ export function GreenhouseGame() {
         <TopBar
           onOpenLeaderboard={() => setLeaderOpen(true)}
           onOpenChests={() => setChestOpen(true)}
+          onOpenHelp={() => setHelpOpen(true)}
         />
 
         {ev && (
@@ -115,8 +116,24 @@ export function GreenhouseGame() {
           </div>
         )}
 
-        <div className="rounded-2xl border border-[color:var(--neon-cyan)]/10 bg-[color:var(--space-panel)]/20 p-3 text-xs text-muted-foreground sm:p-4">
-          🧪 <span className="font-medium text-foreground">Изо-боксы</span> — у каждого свой микроклимат и уровень апгрейда. Прокачивай сорта и боксы, чтобы растения росли быстрее и приносили больше монет.
+        <div className="rounded-2xl border border-[color:var(--neon-cyan)]/15 bg-[color:var(--space-panel)]/30 p-3 text-xs text-muted-foreground sm:p-4">
+          <p className="mb-2 text-sm text-foreground">
+            🧪 <span className="font-medium">Изо-боксы</span> — у каждого свой микроклимат и уровень апгрейда:
+          </p>
+          <ul className="mb-2 grid gap-1 sm:grid-cols-3">
+            <li>
+              <span className="text-[color:var(--neon-magenta)]">🌡 Температура</span> — тепло, которое любит сорт. Отклонение замедляет рост.
+            </li>
+            <li>
+              <span className="text-[color:var(--neon-cyan)]">💧 Влажность</span> — уровень воды в воздухе (0–100%).
+            </li>
+            <li>
+              <span className="text-[color:var(--neon-lime)]">🫧 Кислород</span> — концентрация O₂ (0–100%). Ускоряет фотосинтез.
+            </li>
+          </ul>
+          <p>
+            Настраивай ползунки под идеал сорта — чем ближе, тем быстрее рост и больше монет 💰 и звёзд ⭐. Прокачивай сорта и боксы для дополнительного ускорения и повышенных наград.
+          </p>
         </div>
 
         <Garden onPlant={(id) => setPlantingBox(id)} />
