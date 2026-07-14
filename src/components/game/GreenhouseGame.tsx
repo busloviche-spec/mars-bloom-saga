@@ -166,6 +166,7 @@ export function GreenhouseGame() {
       </main>
 
       <PlayerNameDialog />
+      <HowToPlayDialog open={helpOpen} onOpenChange={setHelpOpen} />
       <SeedShopDialog open={shopOpen} onOpenChange={setShopOpen} />
       <ChestDialog open={chestOpen} onOpenChange={setChestOpen} />
       <PlantSeedDialog
