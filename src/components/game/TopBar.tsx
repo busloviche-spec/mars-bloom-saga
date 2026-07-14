@@ -1,13 +1,14 @@
-import { Trophy, Coins, Star, RotateCcw, Sparkles } from "lucide-react";
+import { Trophy, Coins, Star, RotateCcw, Sparkles, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGame } from "@/game/store";
 
 type Props = {
   onOpenLeaderboard: () => void;
   onOpenChests: () => void;
+  onOpenHelp: () => void;
 };
 
-export function TopBar({ onOpenLeaderboard, onOpenChests }: Props) {
+export function TopBar({ onOpenLeaderboard, onOpenChests, onOpenHelp }: Props) {
   const playerName = useGame((s) => s.playerName);
   const credits = useGame((s) => s.credits);
   const totalScore = useGame((s) => s.totalScore);
