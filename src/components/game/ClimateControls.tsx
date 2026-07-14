@@ -31,8 +31,8 @@ function Row({ icon, value, display, min, max, color, drift, tooltip, onChange }
   const effPct = drift !== undefined && drift !== 0 ? ((value + drift - min) / (max - min)) * 100 : null;
   return (
     <div className="flex items-center gap-2">
-      <span style={{ color }} className="shrink-0">{icon}</span>
-      <div className="relative h-2 flex-1 rounded-full bg-white/5">
+      <span style={{ color }} title={tooltip} className="shrink-0 cursor-help">{icon}</span>
+      <div className="relative h-2 flex-1 rounded-full bg-white/5" title={tooltip}>
         <div
           className="absolute inset-y-0 left-0 rounded-full"
           style={{ width: `${pct}%`, background: color, boxShadow: `0 0 8px ${color}` }}
