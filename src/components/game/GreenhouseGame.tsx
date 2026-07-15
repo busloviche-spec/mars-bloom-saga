@@ -8,7 +8,7 @@ import { useGame } from "@/game/store";
 import { EVENT_BY_ID } from "@/game/events";
 import { sfx } from "@/game/sounds";
 import { TopBar } from "./TopBar";
-import { Garden } from "./Garden";
+import { GreenhouseScene } from "./GreenhouseScene";
 import { SeedShopDialog } from "./SeedShopDialog";
 import { PlantSeedDialog } from "./PlantSeedDialog";
 import { LeaderboardDialog } from "./LeaderboardDialog";
