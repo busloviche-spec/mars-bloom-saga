@@ -5,7 +5,7 @@ import { PLANT_BY_ID, growthRate, plantHappiness } from "./plants";
 import { EVENTS, EVENT_BY_ID } from "./events";
 
 const INITIAL_BOX_COUNT = 4;
-const MAX_BOXES = 8;
+const MAX_BOXES = 9;
 const NEW_BOX_COST = 150;
 
 export const CHEST_PRICE = 200;
