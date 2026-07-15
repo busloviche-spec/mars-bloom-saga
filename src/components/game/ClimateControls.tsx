@@ -101,6 +101,7 @@ export function BoxClimateControls({ boxId, climate, compact }: Props) {
         color={humidityColor(climate.humidity)}
         drift={ev?.humidityDelta}
         tooltip="💧 Влажность (0–100%). Уровень воды в воздухе. Слишком сухо или сыро — растение грустит и растёт медленнее."
+        compact={compact}
         onChange={(v) => setBoxClimate(boxId, { humidity: v })}
       />
       <Row
