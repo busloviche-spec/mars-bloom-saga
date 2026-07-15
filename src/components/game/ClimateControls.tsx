@@ -113,6 +113,7 @@ export function BoxClimateControls({ boxId, climate, compact }: Props) {
         color={oxygenColor(climate.oxygen)}
         drift={ev?.oxygenDelta}
         tooltip="🫧 Кислород (0–100%). Влияет на скорость фотосинтеза и настроение растения."
+        compact={compact}
         onChange={(v) => setBoxClimate(boxId, { oxygen: v })}
       />
     </div>
