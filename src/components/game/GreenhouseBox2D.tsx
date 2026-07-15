@@ -218,34 +218,39 @@ export function GreenhouseBox2D({ box, index, onPlant }: Props) {
             )}
             style={{ transform: `translateX(-50%) translateY(${wormOffsetY}px)` }}
           >
-            <svg viewBox="0 0 100 40" className="h-full w-full">
+            <svg viewBox="0 0 120 40" className="h-full w-full overflow-visible">
               <defs>
-                <linearGradient id={`wormBody-${box.id}`} x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0" stopColor="#7a1717" />
-                  <stop offset="0.5" stopColor="#d64545" />
-                  <stop offset="1" stopColor="#ffb4b4" />
-                </linearGradient>
+                <radialGradient id={`wormSeg-${box.id}`} cx="0.4" cy="0.35" r="0.7">
+                  <stop offset="0" stopColor="#ffb4b4" />
+                  <stop offset="0.55" stopColor="#d64545" />
+                  <stop offset="1" stopColor="#5a0f0f" />
+                </radialGradient>
               </defs>
-              <path
-                className="worm-body"
-                d="M6,22 Q18,10 30,22 T54,22 T78,22 Q88,22 92,20"
-                stroke={`url(#wormBody-${box.id})`}
-                strokeWidth="12"
-                strokeLinecap="round"
-                fill="none"
-              />
-              <path
-                d="M6,22 Q18,10 30,22 T54,22 T78,22 Q88,22 92,20"
-                stroke="rgba(0,0,0,0.28)"
-                strokeWidth="12"
-                strokeLinecap="round"
-                fill="none"
-                strokeDasharray="1 8"
-                opacity="0.55"
-              />
-              <circle cx="90" cy="20" r="7.5" fill="#e04a4a" stroke="#5a0f0f" strokeWidth="0.6" />
-              <circle cx="93" cy="18" r="1.4" fill="#000" />
-              <path d="M87,23 Q90,25 93,23" stroke="#4a0a0a" strokeWidth="0.8" fill="none" />
+              {/* 5 сегментов тела, извиваются волной */}
+              {[0, 1, 2, 3, 4].map((i) => {
+                const cx = 14 + i * 14;
+                const r = 8 - i * 0.4;
+                return (
+                  <g
+                    key={i}
+                    className="worm-seg"
+                    style={{ animationDelay: `${i * 0.12}s`, transformOrigin: `${cx}px 22px` }}
+                  >
+                    <circle cx={cx} cy={22} r={r} fill={`url(#wormSeg-${box.id})`} stroke="#3a0808" strokeWidth="0.5" />
+                    <ellipse cx={cx - 1.5} cy={20} rx={r * 0.55} ry={r * 0.3} fill="rgba(255,255,255,0.25)" />
+                  </g>
+                );
+              })}
+              {/* Голова с глазом и ртом */}
+              <g className="worm-seg" style={{ animationDelay: "0.6s", transformOrigin: "92px 22px" }}>
+                <circle cx={92} cy={22} r={9} fill="#e04a4a" stroke="#3a0808" strokeWidth="0.6" />
+                <ellipse cx={89} cy={19} rx={4} ry={2.4} fill="rgba(255,255,255,0.3)" />
+                <circle cx={96} cy={19.5} r={2.2} fill="#fff" />
+                <circle cx={96.6} cy={19.8} r={1.2} fill="#000" />
+                <path d="M88,26 Q92,29 96,26" stroke="#3a0808" strokeWidth="1" fill="none" strokeLinecap="round" />
+                <path d="M89,26.5 L89.6,28" stroke="#fff" strokeWidth="0.6" />
+                <path d="M94.5,26.5 L95.1,28" stroke="#fff" strokeWidth="0.6" />
+              </g>
             </svg>
             <span className="pointer-events-none absolute -bottom-1 left-1/2 h-1 w-14 -translate-x-1/2 overflow-hidden rounded-full bg-white/15">
               <span
