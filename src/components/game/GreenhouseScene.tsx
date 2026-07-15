@@ -46,6 +46,49 @@ export function GreenhouseScene({ onPlant }: Props) {
       {/* Пыльная буря */}
       <div className="pointer-events-none absolute inset-0 mars-dust" aria-hidden />
 
+      {/* Кратеры на марсианской поверхности — проглядывают между боксами */}
+      <svg
+        aria-hidden
+        className="pointer-events-none absolute inset-0 h-full w-full opacity-70"
+        viewBox="0 0 800 500"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        <defs>
+          <radialGradient id="crater" cx="0.5" cy="0.4" r="0.55">
+            <stop offset="0" stopColor="oklch(0.16 0.06 30)" stopOpacity="0.85" />
+            <stop offset="0.55" stopColor="oklch(0.22 0.07 35)" stopOpacity="0.6" />
+            <stop offset="0.85" stopColor="oklch(0.40 0.10 45)" stopOpacity="0.55" />
+            <stop offset="1" stopColor="oklch(0.45 0.11 50)" stopOpacity="0" />
+          </radialGradient>
+          <radialGradient id="craterRim" cx="0.5" cy="0.65" r="0.55">
+            <stop offset="0.7" stopColor="transparent" />
+            <stop offset="0.9" stopColor="oklch(0.55 0.13 55)" stopOpacity="0.5" />
+            <stop offset="1" stopColor="transparent" />
+          </radialGradient>
+        </defs>
+        {[
+          { cx: 130, cy: 250, rx: 55, ry: 20 },
+          { cx: 400, cy: 260, rx: 70, ry: 24 },
+          { cx: 670, cy: 240, rx: 48, ry: 18 },
+          { cx: 250, cy: 420, rx: 90, ry: 26 },
+          { cx: 560, cy: 430, rx: 75, ry: 22 },
+          { cx: 80, cy: 400, rx: 40, ry: 14 },
+          { cx: 730, cy: 410, rx: 42, ry: 15 },
+        ].map((c, i) => (
+          <g key={i}>
+            <ellipse cx={c.cx} cy={c.cy} rx={c.rx} ry={c.ry} fill="url(#crater)" />
+            <ellipse cx={c.cx} cy={c.cy} rx={c.rx} ry={c.ry} fill="url(#craterRim)" />
+          </g>
+        ))}
+        {/* Мелкие камешки */}
+        {[
+          [180, 300], [340, 340], [500, 310], [620, 360], [90, 340], [720, 320], [420, 460],
+        ].map(([x, y], i) => (
+          <circle key={`r-${i}`} cx={x} cy={y} r={2} fill="oklch(0.28 0.07 35)" opacity="0.7" />
+        ))}
+      </svg>
+
+
       {/* Сетка боксов */}
       <div className="relative z-10 grid grid-cols-3 gap-3 px-4 py-6 sm:gap-4 sm:px-6">
         {boxes.map((box, i) => (
