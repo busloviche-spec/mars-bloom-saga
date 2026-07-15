@@ -226,31 +226,48 @@ export function GreenhouseBox2D({ box, index, onPlant }: Props) {
                   <stop offset="1" stopColor="#5a0f0f" />
                 </radialGradient>
               </defs>
-              {/* 5 сегментов тела, извиваются волной */}
-              {[0, 1, 2, 3, 4].map((i) => {
-                const cx = 14 + i * 14;
-                const r = 8 - i * 0.4;
+              {/* Голова справа + 5 сегментов тела по убыванию, соединены как одно целое */}
+              {/* Хвост -> тело -> голова: рисуем от хвоста, голова поверх */}
+              {(() => {
+                const headCx = 100;
+                const headR = 9;
+                // сегменты от головы влево, радиусы по убыванию
+                const segs = [
+                  { cx: headCx - 12, r: 8 },
+                  { cx: headCx - 22, r: 7 },
+                  { cx: headCx - 31, r: 6 },
+                  { cx: headCx - 39, r: 5 },
+                  { cx: headCx - 46, r: 4 },
+                ];
                 return (
-                  <g
-                    key={i}
-                    className="worm-seg"
-                    style={{ animationDelay: `${i * 0.12}s`, transformOrigin: `${cx}px 22px` }}
-                  >
-                    <circle cx={cx} cy={22} r={r} fill={`url(#wormSeg-${box.id})`} stroke="#3a0808" strokeWidth="0.5" />
-                    <ellipse cx={cx - 1.5} cy={20} rx={r * 0.55} ry={r * 0.3} fill="rgba(255,255,255,0.25)" />
-                  </g>
+                  <>
+                    {segs
+                      .slice()
+                      .reverse()
+                      .map((s, idx) => {
+                        const i = segs.length - 1 - idx; // 4..0 (хвост -> к голове)
+                        return (
+                          <g
+                            key={i}
+                            className="worm-seg"
+                            style={{ animationDelay: `${(segs.length - i) * 0.12}s`, transformOrigin: `${s.cx}px 22px` }}
+                          >
+                            <circle cx={s.cx} cy={22} r={s.r} fill={`url(#wormSeg-${box.id})`} stroke="#3a0808" strokeWidth="0.5" />
+                            <ellipse cx={s.cx - 1.2} cy={20.5} rx={s.r * 0.55} ry={s.r * 0.3} fill="rgba(255,255,255,0.25)" />
+                          </g>
+                        );
+                      })}
+                    {/* Голова с глазом и ртом — рисуется последней, перекрывает шов с первым сегментом */}
+                    <g className="worm-seg" style={{ animationDelay: "0s", transformOrigin: `${headCx}px 22px` }}>
+                      <circle cx={headCx} cy={22} r={headR} fill={`url(#wormSeg-${box.id})`} stroke="#3a0808" strokeWidth="0.6" />
+                      <ellipse cx={headCx - 3} cy={19} rx={4} ry={2.4} fill="rgba(255,255,255,0.3)" />
+                      <circle cx={headCx + 4} cy={19.5} r={2.2} fill="#fff" />
+                      <circle cx={headCx + 4.6} cy={19.8} r={1.2} fill="#000" />
+                      <path d={`M${headCx - 4},26 Q${headCx},29 ${headCx + 4},26`} stroke="#3a0808" strokeWidth="1" fill="none" strokeLinecap="round" />
+                    </g>
+                  </>
                 );
-              })}
-              {/* Голова с глазом и ртом */}
-              <g className="worm-seg" style={{ animationDelay: "0.6s", transformOrigin: "92px 22px" }}>
-                <circle cx={92} cy={22} r={9} fill="#e04a4a" stroke="#3a0808" strokeWidth="0.6" />
-                <ellipse cx={89} cy={19} rx={4} ry={2.4} fill="rgba(255,255,255,0.3)" />
-                <circle cx={96} cy={19.5} r={2.2} fill="#fff" />
-                <circle cx={96.6} cy={19.8} r={1.2} fill="#000" />
-                <path d="M88,26 Q92,29 96,26" stroke="#3a0808" strokeWidth="1" fill="none" strokeLinecap="round" />
-                <path d="M89,26.5 L89.6,28" stroke="#fff" strokeWidth="0.6" />
-                <path d="M94.5,26.5 L95.1,28" stroke="#fff" strokeWidth="0.6" />
-              </g>
+              })()}
             </svg>
             <span className="pointer-events-none absolute -bottom-1 left-1/2 h-1 w-14 -translate-x-1/2 overflow-hidden rounded-full bg-white/15">
               <span
