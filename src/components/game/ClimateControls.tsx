@@ -70,15 +70,16 @@ function Row({ icon, value, display, min, max, color, drift, tooltip, compact, o
 type Props = {
   boxId: string;
   climate: Climate;
+  compact?: boolean;
 };
 
-export function BoxClimateControls({ boxId, climate }: Props) {
+export function BoxClimateControls({ boxId, climate, compact }: Props) {
   const setBoxClimate = useGame((s) => s.setBoxClimate);
   const activeEvent = useGame((s) => s.activeEvent);
   const ev = activeEvent ? EVENT_BY_ID[activeEvent.eventId] : null;
 
   return (
-    <div className="space-y-1.5">
+    <div className={compact ? "space-y-1" : "space-y-1.5"}>
       <Row
         icon={<Thermometer className="size-3.5" />}
         value={climate.temp}
