@@ -136,7 +136,7 @@ export function GreenhouseGame() {
           </p>
         </div>
 
-        <Garden onPlant={(id) => setPlantingBox(id)} />
+        <GreenhouseScene onPlant={(id: string) => setPlantingBox(id)} />
 
         <div className="grid gap-2 sm:grid-cols-2">
           <Button
