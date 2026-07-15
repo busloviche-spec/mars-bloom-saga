@@ -37,6 +37,7 @@ function moodEmoji(h: number) {
 export function GreenhouseBox2D({ box, index, onPlant }: Props) {
   const harvest = useGame((s) => s.harvest);
   const upgradeBox = useGame((s) => s.upgradeBox);
+  const squashPest = useGame((s) => s.squashPest);
   const credits = useGame((s) => s.credits);
   const customPlants = useGame((s) => s.customPlants);
   const activeEvent = useGame((s) => s.activeEvent);
@@ -61,7 +62,8 @@ export function GreenhouseBox2D({ box, index, onPlant }: Props) {
   const boxCost = boxUpgradeCost(boxLevel);
   const canAffordBoxUpgrade = credits >= boxCost && canUpgradeBox;
 
-  const handleBoxUpgrade = () => {
+  const handleBoxUpgrade = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (upgradeBox(box.id)) {
       sfx.upgrade();
       toast.success(`Изо-бокс #${index + 1} прокачан`, {
@@ -79,29 +81,49 @@ export function GreenhouseBox2D({ box, index, onPlant }: Props) {
     }
   };
 
+  const wormEmerging = hasPest && pest ? pest.biteProgress < 0.3 : false;
+  const wormOffsetY = hasPest && pest
+    ? Math.max(0, (0.3 - Math.min(pest.biteProgress, 0.3)) / 0.3) * 18
+    : 0;
+
   return (
     <div
       data-box-id={box.id}
-      className="mars-box relative flex w-[168px] shrink-0 flex-col gap-1.5 sm:w-[184px]"
+      className="relative flex w-full min-w-0 flex-col gap-1.5"
     >
-      {/* Крышка / рамка */}
-      <div className="flex items-center justify-between gap-1 rounded-t-md border border-b-0 border-[color:var(--neon-cyan)]/40 bg-gradient-to-b from-[color:var(--neon-cyan)]/20 to-[color:var(--space-panel)]/60 px-2 py-1">
-        <div className="flex items-center gap-1.5">
-          <span className="grid size-5 place-items-center rounded bg-[color:var(--neon-cyan)]/25 font-display text-[10px] text-[color:var(--neon-cyan)]">
-            {index + 1}
+      {/* Купол */}
+      <button
+        onClick={handleBoxClick}
+        title={
+          plant
+            ? `${plant.name}\n🌡 ${plant.idealTemp}°C  💧 ${plant.idealHumidity}%  🫧 ${plant.idealOxygen}%`
+            : "Посадить семя"
+        }
+        className={cn(
+          "mars-dome relative flex h-[220px] w-full flex-col items-center justify-end overflow-hidden transition-all",
+          cell.isReady && "mars-dome-ready cursor-pointer",
+          !cell.plantId && "mars-dome-empty cursor-pointer",
+          hasPest && "mars-dome-pest",
+        )}
+      >
+        {/* Блик стекла */}
+        <span aria-hidden className="mars-dome-glare" />
+
+        {/* Верхняя плашка: номер / уровень / апгрейд */}
+        <span className="absolute left-1/2 top-2 z-20 flex -translate-x-1/2 items-center gap-1 rounded-full border border-[color:var(--neon-cyan)]/40 bg-[color:var(--space-panel)]/80 px-2 py-0.5 backdrop-blur">
+          <span className="font-display text-[10px] text-[color:var(--neon-cyan)]">
+            #{index + 1}
           </span>
           <span
-            className="rounded-full border border-[color:var(--neon-lime)]/40 bg-[color:var(--neon-lime)]/10 px-1.5 py-0.5 font-display text-[9px] text-[color:var(--neon-lime)]"
+            className="rounded-full bg-[color:var(--neon-lime)]/15 px-1 font-display text-[9px] text-[color:var(--neon-lime)]"
             title={`Скорость ×${boxSpeedMult(boxLevel).toFixed(2)} · Награда ×${boxRewardMult(boxLevel).toFixed(2)}`}
           >
             ур.{boxLevel}
           </span>
-        </div>
-        <div className="flex items-center gap-1">
           {plant && (
             <span
-              className="grid size-5 place-items-center rounded-full border border-white/10 bg-[color:var(--space-bg)] text-[10px]"
-              style={{ boxShadow: `0 0 6px ${moodColor(happiness)}` }}
+              className="text-[10px]"
+              style={{ textShadow: `0 0 6px ${moodColor(happiness)}` }}
               title="Настроение растения"
             >
               {moodEmoji(happiness)}
@@ -112,42 +134,17 @@ export function GreenhouseBox2D({ box, index, onPlant }: Props) {
             disabled={!canAffordBoxUpgrade}
             title={canUpgradeBox ? `Апгрейд бокса за ${boxCost}💰` : "Максимальный уровень"}
             className={cn(
-              "flex items-center gap-0.5 rounded-md border px-1 py-0.5 text-[9px] font-display transition-all",
+              "flex items-center gap-0.5 rounded-full px-1 font-display text-[9px] transition-all",
               canAffordBoxUpgrade
-                ? "border-[color:var(--neon-magenta)]/50 text-[color:var(--neon-magenta)] hover:bg-[color:var(--neon-magenta)]/10"
-                : "cursor-not-allowed border-white/10 text-muted-foreground opacity-60",
+                ? "text-[color:var(--neon-magenta)] hover:bg-[color:var(--neon-magenta)]/15"
+                : "cursor-not-allowed text-muted-foreground opacity-60",
             )}
           >
             <Zap className="size-2.5" />
             {canUpgradeBox ? boxCost : "MAX"}
           </button>
-        </div>
-      </div>
+        </span>
 
-      {/* Стеклянный аквариум */}
-      <button
-        onClick={handleBoxClick}
-        title={
-          plant
-            ? `${plant.name}\n🌡 ${plant.idealTemp}°C  💧 ${plant.idealHumidity}%  🫧 ${plant.idealOxygen}%`
-            : "Посадить семя"
-        }
-        className={cn(
-          "relative flex h-[180px] w-full flex-col items-center justify-end overflow-hidden border-2 border-t-0 bg-gradient-to-b from-[color:var(--neon-cyan)]/8 via-transparent to-[color:var(--space-panel-deep)]/50 backdrop-blur-[2px] transition-all",
-          cell.isReady
-            ? "cursor-pointer border-[color:var(--neon-lime)]/70 shadow-[inset_0_0_28px_-4px_var(--neon-lime),0_0_20px_-6px_var(--neon-lime)]"
-            : cell.plantId
-              ? "cursor-default border-[color:var(--neon-cyan)]/40"
-              : "cursor-pointer border-dashed border-[color:var(--neon-cyan)]/30 hover:border-[color:var(--neon-cyan)]/70 hover:bg-[color:var(--neon-cyan)]/5",
-          hasPest && "border-red-500/70 shadow-[inset_0_0_28px_-4px_#ef4444]",
-        )}
-        style={{ borderRadius: "0 0 10px 10px" }}
-      >
-        {/* Блик стекла */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-y-0 left-2 w-1.5 rounded-full bg-white/10 blur-[1px]"
-        />
         {/* Пол бокса (грунт) */}
         <span
           aria-hidden
@@ -157,9 +154,10 @@ export function GreenhouseBox2D({ box, index, onPlant }: Props) {
               "linear-gradient(180deg, transparent, oklch(0.28 0.08 40) 30%, oklch(0.22 0.07 38))",
           }}
         />
+
         {/* Растение или + */}
         {!cell.plantId ? (
-          <span className="pointer-events-none mb-8 flex items-center gap-1 text-[color:var(--neon-cyan)]/70">
+          <span className="pointer-events-none mb-10 flex items-center gap-1 text-[color:var(--neon-cyan)]/80">
             <Plus className="size-6" />
             <span className="font-display text-xs">Посадить</span>
           </span>
@@ -177,7 +175,6 @@ export function GreenhouseBox2D({ box, index, onPlant }: Props) {
             >
               {stageEmoji(plant!, cell.progress)}
             </span>
-            {/* Стебель, если растение уже проросло */}
             {cell.progress > 0.15 && (
               <span
                 aria-hidden
@@ -189,10 +186,74 @@ export function GreenhouseBox2D({ box, index, onPlant }: Props) {
                 }}
               />
             )}
-            <span className="pointer-events-none absolute bottom-1 left-2 right-2 line-clamp-1 text-[10px] font-medium text-foreground/80">
+            <span className="pointer-events-none absolute bottom-1 left-2 right-2 line-clamp-1 text-center text-[10px] font-medium text-foreground/85">
               {plant?.name}
             </span>
           </>
+        )}
+
+        {/* Червь внутри бокса с растением */}
+        {hasPest && pest && (
+          <span
+            role="button"
+            tabIndex={0}
+            aria-label="Раздавить червя"
+            title="Раздавить червя"
+            onClick={(e) => {
+              e.stopPropagation();
+              sfx.squash();
+              squashPest();
+              toast.success("🪱 Червь уничтожен!", { description: "+25 💰 · +10 очков" });
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.stopPropagation();
+                sfx.squash();
+                squashPest();
+              }
+            }}
+            className={cn(
+              "absolute bottom-2 left-1/2 z-30 h-7 w-[80%] max-w-[110px] -translate-x-1/2 cursor-pointer",
+              wormEmerging ? "worm-emerge" : "worm-chewing",
+            )}
+            style={{ transform: `translateX(-50%) translateY(${wormOffsetY}px)` }}
+          >
+            <svg viewBox="0 0 100 40" className="h-full w-full">
+              <defs>
+                <linearGradient id={`wormBody-${box.id}`} x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0" stopColor="#7a1717" />
+                  <stop offset="0.5" stopColor="#d64545" />
+                  <stop offset="1" stopColor="#ffb4b4" />
+                </linearGradient>
+              </defs>
+              <path
+                className="worm-body"
+                d="M6,22 Q18,10 30,22 T54,22 T78,22 Q88,22 92,20"
+                stroke={`url(#wormBody-${box.id})`}
+                strokeWidth="12"
+                strokeLinecap="round"
+                fill="none"
+              />
+              <path
+                d="M6,22 Q18,10 30,22 T54,22 T78,22 Q88,22 92,20"
+                stroke="rgba(0,0,0,0.28)"
+                strokeWidth="12"
+                strokeLinecap="round"
+                fill="none"
+                strokeDasharray="1 8"
+                opacity="0.55"
+              />
+              <circle cx="90" cy="20" r="7.5" fill="#e04a4a" stroke="#5a0f0f" strokeWidth="0.6" />
+              <circle cx="93" cy="18" r="1.4" fill="#000" />
+              <path d="M87,23 Q90,25 93,23" stroke="#4a0a0a" strokeWidth="0.8" fill="none" />
+            </svg>
+            <span className="pointer-events-none absolute -bottom-1 left-1/2 h-1 w-14 -translate-x-1/2 overflow-hidden rounded-full bg-white/15">
+              <span
+                className="block h-full bg-red-500"
+                style={{ width: `${pest.biteProgress * 100}%` }}
+              />
+            </span>
+          </span>
         )}
       </button>
 
