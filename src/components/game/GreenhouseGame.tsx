@@ -8,7 +8,7 @@ import { useGame } from "@/game/store";
 import { EVENT_BY_ID } from "@/game/events";
 import { sfx } from "@/game/sounds";
 import { TopBar } from "./TopBar";
-import { Garden } from "./Garden";
+import { GreenhouseScene } from "./GreenhouseScene";
 import { SeedShopDialog } from "./SeedShopDialog";
 import { PlantSeedDialog } from "./PlantSeedDialog";
 import { LeaderboardDialog } from "./LeaderboardDialog";
@@ -136,7 +136,7 @@ export function GreenhouseGame() {
           </p>
         </div>
 
-        <Garden onPlant={(id) => setPlantingBox(id)} />
+        <GreenhouseScene onPlant={(id: string) => setPlantingBox(id)} />
 
         <div className="grid gap-2 sm:grid-cols-2">
           <Button

@@ -23,23 +23,24 @@ type RowProps = {
   color: string;
   drift?: number;
   tooltip: string;
+  compact?: boolean;
   onChange: (v: number) => void;
 };
 
-function Row({ icon, value, display, min, max, color, drift, tooltip, onChange }: RowProps) {
+function Row({ icon, value, display, min, max, color, drift, tooltip, compact, onChange }: RowProps) {
   const pct = ((value - min) / (max - min)) * 100;
   const effPct = drift !== undefined && drift !== 0 ? ((value + drift - min) / (max - min)) * 100 : null;
   return (
-    <div className="flex items-center gap-2">
+    <div className={compact ? "flex items-center gap-1.5" : "flex items-center gap-2"}>
       <span style={{ color }} title={tooltip} className="shrink-0 cursor-help">{icon}</span>
-      <div className="relative h-2 flex-1 rounded-full bg-white/5" title={tooltip}>
+      <div className={`relative ${compact ? "h-1.5" : "h-2"} flex-1 rounded-full bg-white/5`} title={tooltip}>
         <div
           className="absolute inset-y-0 left-0 rounded-full"
           style={{ width: `${pct}%`, background: color, boxShadow: `0 0 8px ${color}` }}
         />
         {effPct !== null && (
           <div
-            className="absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[color:var(--neon-magenta)] bg-[color:var(--space-bg)]"
+            className="absolute top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[color:var(--neon-magenta)] bg-[color:var(--space-bg)]"
             style={{ left: `${Math.max(0, Math.min(100, effPct))}%` }}
           />
         )}
@@ -52,11 +53,14 @@ function Row({ icon, value, display, min, max, color, drift, tooltip, onChange }
           className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
         />
         <div
-          className="pointer-events-none absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-[color:var(--space-bg)]"
+          className={`pointer-events-none absolute top-1/2 ${compact ? "size-3" : "size-4"} -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-[color:var(--space-bg)]`}
           style={{ left: `${pct}%`, borderColor: color, boxShadow: `0 0 8px ${color}` }}
         />
       </div>
-      <span className="w-14 shrink-0 text-right font-display text-xs tabular-nums" style={{ color }}>
+      <span
+        className={`shrink-0 text-right font-display tabular-nums ${compact ? "w-9 text-[10px]" : "w-14 text-xs"}`}
+        style={{ color }}
+      >
         {display}
       </span>
     </div>
@@ -66,15 +70,16 @@ function Row({ icon, value, display, min, max, color, drift, tooltip, onChange }
 type Props = {
   boxId: string;
   climate: Climate;
+  compact?: boolean;
 };
 
-export function BoxClimateControls({ boxId, climate }: Props) {
+export function BoxClimateControls({ boxId, climate, compact }: Props) {
   const setBoxClimate = useGame((s) => s.setBoxClimate);
   const activeEvent = useGame((s) => s.activeEvent);
   const ev = activeEvent ? EVENT_BY_ID[activeEvent.eventId] : null;
 
   return (
-    <div className="space-y-1.5">
+    <div className={compact ? "space-y-1" : "space-y-1.5"}>
       <Row
         icon={<Thermometer className="size-3.5" />}
         value={climate.temp}
@@ -84,6 +89,7 @@ export function BoxClimateControls({ boxId, climate }: Props) {
         color={tempColor(climate.temp)}
         drift={ev?.tempDelta}
         tooltip="🌡 Температура (−50…+50°C). У каждого сорта свой идеал — чем ближе, тем быстрее рост и больше монет."
+        compact={compact}
         onChange={(v) => setBoxClimate(boxId, { temp: v })}
       />
       <Row
@@ -95,6 +101,7 @@ export function BoxClimateControls({ boxId, climate }: Props) {
         color={humidityColor(climate.humidity)}
         drift={ev?.humidityDelta}
         tooltip="💧 Влажность (0–100%). Уровень воды в воздухе. Слишком сухо или сыро — растение грустит и растёт медленнее."
+        compact={compact}
         onChange={(v) => setBoxClimate(boxId, { humidity: v })}
       />
       <Row
@@ -106,6 +113,7 @@ export function BoxClimateControls({ boxId, climate }: Props) {
         color={oxygenColor(climate.oxygen)}
         drift={ev?.oxygenDelta}
         tooltip="🫧 Кислород (0–100%). Влияет на скорость фотосинтеза и настроение растения."
+        compact={compact}
         onChange={(v) => setBoxClimate(boxId, { oxygen: v })}
       />
     </div>
