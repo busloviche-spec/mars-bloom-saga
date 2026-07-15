@@ -89,6 +89,7 @@ export function BoxClimateControls({ boxId, climate, compact }: Props) {
         color={tempColor(climate.temp)}
         drift={ev?.tempDelta}
         tooltip="🌡 Температура (−50…+50°C). У каждого сорта свой идеал — чем ближе, тем быстрее рост и больше монет."
+        compact={compact}
         onChange={(v) => setBoxClimate(boxId, { temp: v })}
       />
       <Row
