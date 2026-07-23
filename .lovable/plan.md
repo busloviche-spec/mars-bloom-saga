@@ -1,45 +1,104 @@
-# План: купольная сетка 2×3 и червь внутри бокса
 
-## 1. Сетка боксов 2×3 (+3 докупаемых)
+## Обзор
 
-Файл: `src/components/game/GreenhouseScene.tsx`
+Добавим глобальную таблицу лидеров с регистрацией игроков (email/пароль + Google), защищённой записью через RLS, публичным GET-эндпоинтом, страницей рейтинга с подсветкой текущего игрока и авто-отправкой только при побитии личного рекорда.
 
-- Заменить горизонтальный `flex ... overflow-x-auto` на CSS-grid: `grid grid-cols-3 gap-4` с двумя рядами.
-- Ряды визуально стоят на разных «полках» марсианского грунта: второй ряд ниже с чуть меньшим масштабом и своей полосой песка (два слоя `.mars-ground` на разной высоте), чтобы сохранить ощущение «вид сбоку».
-- Кнопка «Новый изо-бокс» становится обычной ячейкой грида и появляется после последнего бокса; предел — 9 (2 полных ряда + 3 докупаемых в третьем ряду, который появляется автоматически при `boxes.length > 6`).
-- В `src/game/store.ts` поправить `MAX_BOX_COUNT` до 9 (сейчас используется как предел; проверить текущее значение и увеличить, не трогая экономику/цены).
-- Убрать `snap-x`/горизонтальный скролл; сцена остаётся `relative overflow-hidden` с фоном.
+## Уточнение
 
-## 2. Купольная форма боксов со стеклянным отливом
+Сейчас в проекте нет UI авторизации, но требование «user_id → зарегистрированный пользователь» подразумевает вход. Поставлю дефолт Lovable Cloud: **email/пароль + Google OAuth**. Если игрок не залогинен, кнопка «Отправить в топ» будет предлагать войти; локальный лидерборд на устройстве остаётся как есть.
 
-Файл: `src/components/game/GreenhouseBox2D.tsx`
+Существующая таблица `scores` в БД дублирует функциональность, но по ТЗ нужна именно `leaderboard` — сделаю новую, `scores` не трогаю.
 
-- Изменить контейнер «аквариума» с прямоугольника на купол:
-  - Верх — полукруг: `border-radius: 50% 50% 12px 12px / 70% 70% 12px 12px`.
-  - Фон — светло-голубой градиент стекла: `linear-gradient(180deg, rgba(180,220,255,0.22), rgba(120,200,230,0.10) 55%, rgba(40,60,80,0.35))` поверх текущего backdrop-blur.
-  - Рамка — тонкая `border` цвета `rgba(170,220,255,0.55)` со свечением `box-shadow: inset 0 0 30px rgba(180,230,255,0.25), 0 0 18px -6px rgba(120,200,255,0.4)`.
-  - Блик — второй абсолютный элемент-эллипс сверху слева (`radial-gradient` белый → прозрачный) для эффекта стекла.
-- Крышка над куполом упрощается: узкая медная полоска с номером/уровнем/апгрейдом, сама «шапка» переезжает на верх купола (абсолютно позиционируется над ним, чтобы не ломать полукруглый силуэт).
-- Готовое растение — сохраняем зелёное свечение, но комбинируем с голубым отливом стекла (доп. слой inset-shadow lime).
-- Пустой бокс — тот же купол с пунктирной голубоватой обводкой и «+ Посадить» по центру.
+## 1. База данных (миграция)
 
-Стили: новый класс `.mars-dome` в `src/styles.css` с указанными border-radius, градиентом и shadow, плюс `.mars-dome-glare` для блика — чтобы не раздувать Tailwind arbitrary values.
+Новая таблица `public.leaderboard`:
+- `id uuid pk default gen_random_uuid()`
+- `user_id uuid not null references auth.users on delete cascade`
+- `score integer not null check (score >= 0)`
+- `created_at timestamptz not null default now()`
+- Индекс `(score DESC, created_at ASC)` для сортировки топа.
+- Индекс по `user_id` для быстрого чтения личного рекорда.
 
-## 3. Червь внутри бокса с растением
+RLS:
+- `SELECT` — всем (`anon`, `authenticated`), полный публичный read.
+- `INSERT` — `authenticated`, `WITH CHECK (auth.uid() = user_id)`.
+- `UPDATE`/`DELETE` — политики не создаём (запрещено всем).
+- GRANT `SELECT` для `anon` и `authenticated`, `INSERT` только для `authenticated`, `ALL` для `service_role`.
 
-Файлы: `src/components/game/GreenhouseScene.tsx`, `src/components/game/GreenhouseBox2D.tsx`
+Nickname/аватар возьмём из `public.profiles` через JOIN (там уже есть `username`; аватар пока `null`, поле в API отдадим опционально).
 
-- Удалить из `GreenhouseScene` весь блок расчёта `wormTargetLeft` / `wormLeft` и абсолютный SVG-червь на уровне сцены.
-- В `GreenhouseBox2D`, когда `hasPest === true`, отрисовывать SVG-червя **внутри** купола, поверх грунта бокса:
-  - Позиция: `absolute bottom-1 left-1/2 -translate-x-1/2`, размер ~90×28px.
-  - Тот же SVG-червь (тело-волна, сегменты, голова с глазом) — переносится из `GreenhouseScene` в `GreenhouseBox2D`.
-  - Клик по червю: `stopPropagation` + `squashPest()` + toast (логика уже есть в сцене, переезжает в бокс).
-  - Пока `biteProgress < 0.3` — червь выползает из-под грунта: анимация `translateY` снизу вверх (через inline-style на основе `biteProgress`), после — «жуёт» (класс `worm-chewing`, уже есть).
-  - Полоса `biteProgress` остаётся под червём внутри бокса.
-- Рамка бокса при `hasPest` продолжает подсвечиваться красным (уже есть).
+## 2. Авторизация
+
+- Роут `src/routes/auth.tsx` — форма email/пароль (sign in / sign up) и кнопка «Войти через Google».
+- Google провайдер настраиваю через `supabase--configure_social_auth`.
+- В `__root.tsx` — подписка на `onAuthStateChange` (identity events) + `router.invalidate()`.
+- `attachSupabaseAuth` уже в `src/start.ts` — проверю и при необходимости добавлю.
+
+## 3. API-эндпоинт `/api/leaderboard`
+
+Публичный TSS-роут `src/routes/api/public/leaderboard.ts` (GET):
+- Query: `limit` (default 50, max 100), `offset` (default 0).
+- Использует server publishable client (RLS, роль `anon`), безопасно для SSR.
+- SQL:
+  ```
+  select l.score, l.created_at, l.user_id, p.username as nickname
+  from leaderboard l
+  left join profiles p on p.id = l.user_id
+  order by l.score desc, l.created_at asc
+  limit $1 offset $2
+  ```
+- Ответ: `{ items: [{ user_id, nickname, avatar_url: null, score, rank }], total, limit, offset }`.
+- `rank` = `offset + index + 1`.
+- CORS не нужен (same-origin), но добавлю `Cache-Control: no-store` для актуальности.
+
+## 4. Server-функции для клиента
+
+`src/lib/leaderboard.functions.ts`:
+- `getLeaderboardPage({ limit, offset })` — обёртка чтения (для React Query).
+- `getMyBestScore()` — `.middleware([requireSupabaseAuth])`, возвращает `max(score)` текущего юзера.
+- `submitScore({ score })` — `.middleware([requireSupabaseAuth])`, читает личный рекорд и делает INSERT только если `score > best`. Возвращает `{ inserted: boolean, best: number }`.
+
+## 5. UI — страница `/leaderboard`
+
+`src/routes/leaderboard.tsx` (публичный роут, свой `head()`):
+- Загрузка через TanStack Query: `useSuspenseQuery` в лоадере (`ensureQueryData`), пагинация `limit=50`, кнопка «Загрузить ещё» инкрементит offset и мёржит страницы.
+- Скелетон-строки во время initial loading.
+- Список строк: rank (иконка короны 👑 для #1, медали для #2/#3), nickname, score.
+- Текущий пользователь (`supabase.auth.getUser` через клиентский хук): подсветка рамкой neon-cyan и якорь-скролл к своей строке.
+- Кнопка «Обновить» → `queryClient.invalidateQueries(['leaderboard'])`.
+- Ошибка (errorComponent): «Не удалось загрузить рейтинг» + retry.
+- Кнопка «Войти» если анонимен.
+- Ссылка на страницу — из `TopBar` (иконка Trophy рядом с локальным лидербордом) и из главного меню.
+
+## 6. Интеграция с игрой (auto-submit)
+
+- В `useGame` store: после каждого `harvest()` (или при `saveScoreToLeaderboard`) проверяем: если пользователь залогинен и `totalScore > lastSubmittedBest` (кешируется в сторе + подтверждается сервером через `getMyBestScore`), вызываем `submitScore({ score: totalScore })`.
+- Дебаунс 3–5 сек, чтобы не спамить сервер при быстрых сборах подряд.
+- Сохраняем `lastSubmittedBest` в persist-стор, чтобы не гонять RPC при каждом заходе.
+- Toast «🏆 Новый личный рекорд: N — отправлен в глобальный топ».
+
+## 7. Файлы
+
+Новые:
+- миграция `leaderboard` (через `supabase--migration`)
+- `src/routes/auth.tsx`
+- `src/routes/leaderboard.tsx`
+- `src/routes/api/public/leaderboard.ts`
+- `src/lib/leaderboard.functions.ts`
+- `src/components/game/LeaderboardLink.tsx` (кнопка в TopBar)
+
+Правки:
+- `src/game/store.ts` — `lastSubmittedBest`, auto-submit хук.
+- `src/components/game/TopBar.tsx` — кнопка перехода на `/leaderboard`.
+- `src/components/game/GreenhouseGame.tsx` — вызов auto-submit после harvest, toast.
+- `src/routes/__root.tsx` — `onAuthStateChange`.
 
 ## Технические детали
 
-- Никаких изменений в `store.ts` кроме `MAX_BOX_COUNT` (9). Логика `pest.boxId`, `squashPest`, тик, награды — не трогаем.
-- Все цвета для стекла — новые семантические переменные не нужны: используем локальные rgba, чтобы не менять марсианскую палитру темы.
-- Адаптив: на узких экранах grid остаётся `grid-cols-3` (боксы становятся уже, минимальная ширина купола ~110px через `min-w-0` + `w-full`).
+- Публичный чтение-эндпоинт использует publishable-key client в TSS-роуте, RLS-политика `SELECT TO anon` разрешает.
+- Запись — через `createServerFn` + `requireSupabaseAuth`, так что `user_id = context.userId` не подделать.
+- INSERT-only: проверка «лучше личного рекорда» делается на сервере в `submitScore`, чтобы клиент не мог насыпать записей с одинаковым низким счётом.
+- SEO: у `/leaderboard` и `/auth` собственные `head()` c уникальными title/description/og.
+- errorComponent + notFoundComponent на новых роутах с лоадером.
+
+Скажи «ок» — начну реализацию.
