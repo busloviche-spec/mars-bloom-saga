@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      leaderboard: {
+        Row: {
+          created_at: string
+          id: string
+          score: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          score: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          score?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

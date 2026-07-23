@@ -1,4 +1,5 @@
-import { Trophy, Coins, Star, RotateCcw, Sparkles, HelpCircle } from "lucide-react";
+import { Trophy, Coins, Star, RotateCcw, Sparkles, HelpCircle, Globe2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { useGame } from "@/game/store";
 
@@ -79,6 +80,16 @@ export function TopBar({ onOpenLeaderboard, onOpenChests, onOpenHelp }: Props) {
           <Trophy className="mr-1.5 size-4" />
           Рекорды
         </Button>
+        <Link to="/leaderboard">
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-[color:var(--neon-lime)]/40 text-[color:var(--neon-lime)] hover:bg-[color:var(--neon-lime)]/10 hover:text-[color:var(--neon-lime)]"
+          >
+            <Globe2 className="mr-1.5 size-4" />
+            Топ мира
+          </Button>
+        </Link>
         <Button
           variant="ghost"
           size="sm"
