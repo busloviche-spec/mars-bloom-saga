@@ -54,19 +54,9 @@ export const getLeaderboardPage = createServerFn({ method: "GET" })
 
     if (error) throw new Error(error.message);
 
-    const ids = Array.from(new Set((rows ?? []).map((r) => r.user_id)));
-    let names: Record<string, string> = {};
-    if (ids.length) {
-      const { data: profs } = await supabase
-        .from("profiles")
-        .select("id, username")
-        .in("id", ids);
-      names = Object.fromEntries((profs ?? []).map((p) => [p.id, p.username]));
-    }
-
     const items: LeaderRow[] = (rows ?? []).map((r, i) => ({
       user_id: r.user_id,
-      nickname: names[r.user_id] ?? "Агроном",
+      nickname: `Игрок_${r.user_id.slice(-4)}`,
       avatar_url: null,
       score: r.score,
       created_at: r.created_at,
@@ -75,6 +65,7 @@ export const getLeaderboardPage = createServerFn({ method: "GET" })
 
     return { items, limit, offset, hasMore: items.length === limit };
   });
+
 
 export const getMyBestScore = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
