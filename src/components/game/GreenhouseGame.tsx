@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ShoppingBag, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
@@ -7,6 +7,8 @@ import { useGameTick } from "@/game/useGameTick";
 import { useGame } from "@/game/store";
 import { EVENT_BY_ID } from "@/game/events";
 import { sfx } from "@/game/sounds";
+import { supabase } from "@/integrations/supabase/client";
+import { submitScore } from "@/lib/leaderboard.functions";
 import { TopBar } from "./TopBar";
 import { GreenhouseScene } from "./GreenhouseScene";
 import { SeedShopDialog } from "./SeedShopDialog";
