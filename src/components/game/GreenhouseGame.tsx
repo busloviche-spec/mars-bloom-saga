@@ -27,9 +27,39 @@ export function GreenhouseGame() {
   const [plantingBox, setPlantingBox] = useState<string | null>(null);
   const activeEvent = useGame((s) => s.activeEvent);
   const chests = useGame((s) => s.chests);
+  const totalScore = useGame((s) => s.totalScore);
   const hasSeenTutorial = useGame((s) => s.hasSeenTutorial);
   const markTutorialSeen = useGame((s) => s.markTutorialSeen);
   const ev = activeEvent ? EVENT_BY_ID[activeEvent.eventId] : null;
+  const bestSubmittedRef = useRef<number>(0);
+  const submitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Auto-submit personal best to global leaderboard (debounced)
+  useEffect(() => {
+    if (totalScore <= 0) return;
+    if (totalScore <= bestSubmittedRef.current) return;
+    if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
+    submitTimerRef.current = setTimeout(async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) return;
+      try {
+        const res = await submitScore({ data: { score: totalScore } });
+        if (res.inserted) {
+          bestSubmittedRef.current = res.best;
+          toast.success("🏆 Новый личный рекорд!", {
+            description: `${res.best} очков отправлено в глобальный топ`,
+          });
+        } else {
+          bestSubmittedRef.current = res.best;
+        }
+      } catch (err) {
+        console.warn("submitScore failed", err);
+      }
+    }, 3000);
+    return () => {
+      if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
+    };
+  }, [totalScore]);
 
   useEffect(() => {
     if (!hasSeenTutorial) {
